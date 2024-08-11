@@ -100,3 +100,71 @@ exports.createBlog = async (title, subtitle, content, userId,image) => {
   }
 };
 
+exports.updateBlogById = async (blogId, title, subtitle, content) => {
+  try {
+    await Blog.findByIdAndUpdate(blogId, { title, subtitle, body: content });
+  } catch (error) {
+    throw new Error('Error updating blog');
+  }
+};
+
+exports.getUserBlogs = async (userId,page,limit) => {
+  try {
+    const blogs = await Blog.aggregate([
+      { $match: { user_id: userId} }, // Exclude blogs by the current user
+      { $sample: { size: 1000 } }, // Get a large random sample to paginate from
+      { $skip: (page - 1) * limit }, // Skip the first (page - 1) * limit blogs
+      { $limit: limit } // Limit to the specified number of blogs
+    ]);
+    return blogs
+     
+  } catch (error) {
+    throw new Error('Error fetching user blogs');
+  }
+};
+
+
+exports.getFollowingBlogs = async(id) =>
+{
+  const following = await Follow.find({ follower: id });
+  const blogs = await Blog.find();
+  const matchingTags = following.filter(f =>
+    blogs.some(blog =>
+      blog.userid.some(tag => f.followings.includes(following))
+    )
+  );
+  
+
+}
+
+exports.addorremovelike = async (req,res,id,userid) => {
+  console.log("in the service")
+  // const userid = await req.user._id;
+  // console.log(userid);
+
+  try {
+    const blog = await Blog.findById(id);
+
+    if (!blog) {
+      console.log("Blog not found");
+      throw new Error("Blog not found");
+    }
+
+    if (blog.likedby.includes(userid)) {
+      console.log("like decremented");
+      blog.like--;
+      blog.likedby.pull(userid);
+      await blog.save();
+      return false;
+    } else {
+      console.log("like incremented");
+      blog.like++;
+      blog.likedby.push(userid);
+      await blog.save();
+      return true;
+    }
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+};
