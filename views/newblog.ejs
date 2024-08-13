@@ -32,6 +32,18 @@
           <label for="img">Select Image:</label>
           <input type="file" name="image" id="img">
         </div> -->
+        <div class="checkbox-wrapper">
+          <label class="checkbox-label">
+            <input type="checkbox" class="checkbox-input">
+           
+            <% for(let i=0;i < tags.length ;i++) { %>
+            <label>
+              <input type="checkbox" name="myCheckboxes" value="<%= tags[i]._id %>"> <%= tags[i].name %>
+            </label>
+            
+            <% } %>
+          </label>
+        </div>
         <div class="mb-3">
           <label for="image" class="form-label">Image:</label>
           <input type="file" class="form-control" id="image" name="image" required>
