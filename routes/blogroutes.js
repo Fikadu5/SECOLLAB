@@ -1,6 +1,7 @@
 const express = require('express');
 const { getBlogs, getBlogById, createBlog, editBlog, updateBlog,getotherUsersblogs,
-   getFollowingBlogs, getMyBlogs,newRoute,deleteBlog,getTopBlogs,getRandomBlogs } = require('../controllers/blogcontroller');
+   getFollowingBlogs, getMyBlogs,newRoute,deleteBlog,getTopBlogs,getRandomBlogs, getcatagories,
+  newtag,tags,getcatblogs } = require('../controllers/blogcontroller');
 const { ensureAuthenticated } = require('../middleware/authMiddleware');
 const { authenticateToken  } = require('../middleware/tokenauthenticationmiddleware');
 const { getsearchresult } = require('../services/userservice');
@@ -27,6 +28,10 @@ router.post('/new', ensureAuthenticated, (req, res, next) => {
   next();
 }, createBlog);
 
+router.get("/catagories/:name",ensureAuthenticated,getcatblogs)
+router.get("/catagories",ensureAuthenticated,getcatagories);
+// router.get("/catagories/new/add",tags)
+router.post("/catagories/add",ensureAuthenticated,newtag)
 router.get('/top',ensureAuthenticated, (req, res, next) => {
   console.log("Accessing /blogs/top");
   next();
