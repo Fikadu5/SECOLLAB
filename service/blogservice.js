@@ -168,3 +168,17 @@ exports.addorremovelike = async (req,res,id,userid) => {
     throw err;
   }
 };
+
+exports.gettags = async() =>
+{
+  const tags = await BlogTag.find();
+  if(tags)
+  {
+  return tags;
+  }
+  else{
+    console.log("problem fetching from the database");
+  }
+
+
+}
