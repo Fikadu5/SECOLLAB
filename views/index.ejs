@@ -7,11 +7,63 @@
 
 
 <body>
+  <% if(logged_in) {%>
+<%- include("navigationloggedin") %>
+
+<%- include("sidebar") %>
+
+
+    <div class="hero-content">
+        <h2 style="margin-left: 0%;;">Welcome to SEcollab</h2>
+        <p>A platform for software engineers to collaborate, write blogs, and connect with others.</p>
+    </div>
+
+    <div class="container" style="width:100%;">
+        <div class="row"> <!-- Start the row here -->
+            <div class="col-12 col-sm-6 col-md-6 col-lg-4 mb-4">
+                <section id="blogs" class="blogs">
+                    <a href="/blogs">
+                        <h2>Latest Blogs</h2>
+                    </a>
+                    <% for(var i = 0; i < blogs.length; i++) { %>
+                       
+                            <div class="blog-post">
+                                <h3 class="blog-title"><%= blogs[i].title %></h3>
+                                <div class="blog-meta">
+                                    <div style="display: flex; align-items: center;">
+                                        <p style="font-size:40px; margin: 0;">👨🏻‍💻</p>
+                                        <a style="color:inherit;" href="/otherprofile/<%=blogs[i].owner._id %>"><p style="margin: 0; margin-left: 10px;"><%= blogs[i].owner.fname %> <%= blogs[i].owner.lname %></p></a>
+                                    </div>
+                                    
+                                    <p><span class="icon">&#128197;</span> <%= blogs[i].created_at.toDateString() %></p>
+                                    <p><span class="icon">&#x2764;</span> <%= blogs[i].like %></p>
+                                </div>
+                                <% if (blogs[i].subtitle) { %>
+                                    <p class="blog-subtitle"><%= blogs[i].subtitle %></p>
+                                <% } %>
+                                <% if (blogs[i].tags && blogs[i].tags.length > 0) { %>
+                                    <div class="blog-tags">
+                                        <% for(let j = 0; j < blogs[i].tags.length; j++) { %>
+                                            <a href="/blogs/tags/<%= blogs[i].tags[j].slug %>" class="tag">
+                                                <%= blogs[i].tags[j].name %>
+                                            </a>
+                                        <% } %>
+                                    </div>
+                                <% } %>
+                                <div class="blog-excerpt" >
+                                    <p id="content"><%= blogs[i].body.substring(0, 30) %>...</p>
+                                </div>
+                                <div class="read-more">
+                                    <a href="/blogs/<%= blogs[i]._id %>" class="btn-read-more">Continue Reading</a>
+                                </div>
+                            </div>
+                      
+                    <% } %>
+                </section>
+            </div>
 
 
 
-
-<h1>Home page </h1>
 </body>
 
 </html>
