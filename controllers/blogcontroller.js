@@ -5,6 +5,10 @@ const userService = require('../services/userservice');
 const multer = require('multer');
 const path = require('path');
 const Blog = require('../models/blog');
+const BlogTag = require('../models/Blogtag');
+
+
+
 exports.getsearchresult = async(req,res) =>
 {
   try{
@@ -91,7 +95,7 @@ exports.getTopBlogs = async (req, res) => {
     const page = req.query.page ? parseInt(req.query.page) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit) : 5; // Default limit to 5 if not provided
     const totalBlogsCount = await Blog.countDocuments().exec();
-    const blogs = await blogService.getTopBlogs(page, limit);
+    const blogs = await blogService.getTopBlogs(page, limit,req.user._id)
 
     const pagination = {
       currentPage: page,
@@ -139,9 +143,10 @@ catch(err)
 
 
 
-exports.newRoute = (req, res) => {
+exports.newRoute = async (req, res) => {
   console.log("In newRoute controller");
-  res.render('newblog');
+  const tags = await blogService.gettags()
+  res.render('newblog',{tags});
 };
 
 exports.getBlogById = async (req, res) => {
@@ -150,7 +155,7 @@ exports.getBlogById = async (req, res) => {
     const id = req.params.id;
     try {
       const blog = await blogService.getBlogById(id);
-      const user = await userService.getUserById(blog.user_id);
+      const user = await userService.getUserById(req.user._id);
       res.render('specficblog', { blog, user });
     } catch (error) {
       console.error('Error fetching blog:', error);
@@ -162,7 +167,7 @@ exports.getBlogById = async (req, res) => {
 
 
 const storage = multer.diskStorage({
-  destination: './uploads/',
+  destination: 'public/uploads/blog',
   filename: function(req, file, cb){
       cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
   }
@@ -199,10 +204,11 @@ exports.createBlog = async (req, res) => {
     if(err){
       return res.status(400).send(err);
     }
+    const checkedOptions = req.body.myCheckboxes || [];
     
     const { title, content, subtitle } = req.body;
     try {
-      blogService.createBlog(title, subtitle, content, req.user._id, req.file.filename);
+      blogService.createBlog(title, subtitle, content, req.user._id, req.file.filename,checkedOptions);
       res.redirect('/blogs');
     } catch (error) {
       console.error('Error creating blog:', error);
@@ -318,3 +324,25 @@ exports.getRandomBlogs = async (req, res) => {
   }
 };
 
+
+exports.getcatagories = async(req,res) =>
+{
+  const tags = await blogService.gettags();
+  res.render("Blogcatagories",{ tags } )
+}
+
+exports.newtag = async(req,res) =>
+{
+  console.log("in the new catagories")
+
+  const name = blogService.newtag(req.body.name,req.body.slug);
+  res.redirect("/blogs/catagories")
+}
+
+
+
+exports.getcatblogs = async(req,res) =>
+{
+  const blogs = await blogService.getcatblogs(req.params.name)
+  res.render("allblog",{blogs})
+}
