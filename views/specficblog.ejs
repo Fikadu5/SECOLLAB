@@ -129,7 +129,7 @@ color:white;
               
                   <% if (blog && blog.tags && blog.tags.length > 0) { %>
                     <% for(let i=0; i< blog.tags.length;i++) { %>
-                      <a href="/blogs/" class="tag"><%= blog.tags[i].name %></a>
+                      <a href="/blogs/catagories/<%= blog.tags[i].name %>" class="tag"><%= blog.tags[i].name %></a>
                     
                   <% } }%>
 
