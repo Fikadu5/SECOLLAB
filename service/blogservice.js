@@ -182,3 +182,27 @@ exports.gettags = async() =>
 
 
 }
+
+
+exports.getcatblogs = async(name) =>
+{
+  const blogtag = await BlogTag.findOne({ name: name });
+if (!blogtag) {
+  console.log("Tag not found");
+  return; // Exit if the tag doesn't exist
+}
+console.log(blogtag._id); // Should log a valid ObjectId
+
+const blogs = await Blog.find({ tags: { $in: [blogtag._id] } }).sort({ created_at: 1 }).populate("tags");
+console.log(blogs); // Check if any blogs are returned
+
+
+if (blogs) {
+  // Blog found with the specified tag
+  return blogs
+} else {
+  // Blog not found with the specified tag
+  console.log("blog not found")
+
+}
+}
