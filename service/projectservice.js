@@ -13,3 +13,29 @@ exports.getProjects = async (id) => {
     console.log(e);
   }
 };
+
+
+exports.createProject = async (projectDetails,user_id,checkedOptions) => {
+  const project = new Project({
+    title:projectDetails.name,
+    owner: user_id,
+    description:projectDetails.description,
+    dueDate:projectDetails.date,
+    looking_for: projectDetails.lookingfor,
+    requirment:projectDetails.requirment,
+    tags:checkedOptions
+  });
+
+  try {
+    await project.save();
+  } catch (error) {
+    throw new Error('Error creating project',error);
+  }
+};
+exports.gettags = async() =>
+  {
+    const tags = await ProjectTag.find();
+    return tags
+
+  }
+
