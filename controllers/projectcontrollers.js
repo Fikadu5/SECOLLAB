@@ -1,0 +1,26 @@
+const ProjectTag = require('../models/projecttag');
+const projectService = require('../services/projectservice');
+
+
+exports.getProjects = async (req, res) => {
+
+    try {
+      const projects = await projectService.getProjects(req.user._id);
+      res.render('project', { projects, messages: {
+        success: req.flash('success'),
+        error: req.flash('error')
+      } });
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      res.status(500).send('Internal Server Error');
+    }
+
+};
+
+
+exports.newproject = async(req,res) =>
+{
+  const tags = await projectService.gettags();
+
+  res.render('addproject',{tags});
+}
