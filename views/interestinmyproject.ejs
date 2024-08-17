@@ -28,7 +28,25 @@
                     </a>
                 <% } %>
             </div>
-            
+              <div class="interests">
+                <h3>Interests</h3>
+                <div class="row">
+                    <% for (let i=0; i< project.requests.length; i++ ) { %>
+                        <div class="col-md-3 mb-3">
+                            <div class="card">
+                                <img src="/uploads/<%= project.requests[i].image%>" class="card-img-top" alt="Profile Image">
+                                <div class="card-body">
+                                    <h5 class="card-title" style="color:white;"><%= project.requests[i].fname %> <%= project.requests[i].lname %></h5>
+                                    <button class="accept" user-id="<%= project.requests[i]._id %>" project-id="<%= project._id %>">Accept</button>
+                                    <a href="/otherprofile/<%= project.requests[i]._id %>" class="btn btn-primary">View Profile</a>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+    </div> 
             
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
