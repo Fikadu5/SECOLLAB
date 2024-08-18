@@ -39,3 +39,31 @@ exports.gettags = async() =>
 
   }
 
+
+exports.searchProjects = async(query) =>
+{
+  const project = Project.find({$title:{$search:query}});
+  return project;
+}
+
+
+exports.getMyProject = async (id) => {
+  try {
+   
+    const projects = await Project.find({ owner: id});
+
+    // If projects are found, send them back to the client
+    if (projects) {
+      console.log("project found")
+      // res.status(200).json(projects);
+        return projects
+    } else {
+      // If no projects are found, send an appropriate message
+      console.log("no project is found")
+    }
+  } catch (error) {
+    // Handle any errors that occur during the database query
+    console.log("An error occurred while fetching projects.", error );
+  }
+};
+
