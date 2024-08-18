@@ -120,4 +120,30 @@ exports.getMyProjectbyid = async(id) =>
 
 }
 
+exports.getcollabration = async(id) =>
+{
+  try{
+  const project = await Project.find({collaborators:id});
+  return project
+  }
+  catch(err)
+  {
+    console.log(err);
+  }
+}
+
+
+exports.deleteproject = async(id) =>
+{
+  try{
+    const project = Project.deleteOne({_id:id})
+    return project;
+
+  }
+  catch(err)
+  {
+    console.log(err)
+  }
+}
+
 
