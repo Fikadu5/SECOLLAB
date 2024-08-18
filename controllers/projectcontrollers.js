@@ -114,3 +114,34 @@ exports.getProjects = async(req,res) =>
     res.render("project",{projects})
 
 }
+
+exports.getmyprojectwithid = async(req,res) =>
+{
+    const project = await projectservice.getMyProjectbyid(req.params.id);
+   res.render("interestinmyproject",{project})
+}
+exports.getFollowingProjects = async(req,res) =>
+{
+    const projects = await projectservice.getfollowingprojects(req.user._id)
+
+    res.render("projects",{projects})
+
+}
+
+exports.deleteproject = async(req,res) =>
+{
+    const id = req.params.id
+    const del = projectservice.deleteproject(id);
+    if(del)
+    {
+        req.flash("successfully delted the project")
+        res.redirect("/projects/myprojects")
+    }
+    else{
+        req.flash("project deletion not successful")
+        res.redirect("/projects/myprojects")
+    }
+
+
+}
+
