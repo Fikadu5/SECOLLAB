@@ -144,4 +144,21 @@ exports.deleteproject = async(req,res) =>
 
 
 }
+exports.registerInterestwithid = async(req,res) =>
+{
+    const projectId=req.params.id;
+    const userid = req.user._id;
+    const project = await projectservice.registerInterest(projectId, userid);
+    if(project)
+    {
+        req.flash("interest successfully registered")
+        
+
+    }
+    else{
+        req.flash("interest already registered")
+
+    }
+    res.redirect("/projects");
+}
 
