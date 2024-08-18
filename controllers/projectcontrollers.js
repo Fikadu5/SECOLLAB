@@ -96,3 +96,21 @@ exports.searchResults = async(req,res) =>
     res.render("")
 }
 
+exports.getProjectById = async(req,res) =>
+
+{
+    const project = await projectservice.getProjectById(req.params.id);
+
+
+    res.render("specficproject",{project})
+}
+
+
+exports.getProjects = async(req,res) =>
+{
+
+
+    const projects = await projectservice.getProjects()
+    res.render("project",{projects})
+
+}
