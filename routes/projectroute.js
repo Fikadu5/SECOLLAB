@@ -8,6 +8,8 @@ router.post('/addproject', ensureAuthenticated,createProject);
 router.get("/projectcatagories",ensureAuthenticated,getcatagories);
 router.get('/searchproject', ensureAuthenticated,searchProjects);
 
+router.post("/searchproject/:text",ensureAuthenticated,searchResults);
+router.get("/projects/:id",ensureAuthenticated,getProjectById);
 
 
 
