@@ -66,4 +66,16 @@ exports.getMyProject = async (id) => {
     console.log("An error occurred while fetching projects.", error );
   }
 };
+exports.getProjectById = async (projectId) => {
+  try {
+    return await Project.findById(projectId)
+    .populate("owner")
+    .populate("tags")
+    .populate("requests")
+    .populate("collaborators");
+  } catch (error) {
+    throw new Error('Error fetching project');
+  }
+};
+
 
