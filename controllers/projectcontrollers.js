@@ -41,3 +41,31 @@ exports.getcatagories = async(req,res) =>
     const tags = await projectService.gettags();
     res.render("projectcatagories",{tags})
   }
+
+exports.getsearchresult = async(req,res) =>
+{
+
+}
+
+exports.getProjects = async(req,res) =>
+{
+
+    const projects = projectservice.getProjects(req.user._id)
+    res.render("project",{projects})
+}
+
+
+exports.getMyProjects = async(req,res) =>
+{
+
+    const id = req.user._id;
+    const project = await projectservice.getMyProject(id);
+
+
+
+
+    res.render("myproject",{project})
+
+
+
+}
