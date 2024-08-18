@@ -28,7 +28,13 @@
             <% if (projects)  { %>
 
 
-            
+           <div class="child">
+                <p><%= projects[i].name %></p>
+                <p><%= projects[i].description %></p>
+                <p>Due Date: <%= projecta[i].due_date %></p>
+                <a href="/projects/<%=project._id %> " type="button"><button class="details-button">View Details</button></a>
+
+            </div> 
 <% } %>
                  </div>
             <% } else {%>
