@@ -69,3 +69,30 @@ exports.getMyProjects = async(req,res) =>
 
 
 }
+
+exports.getmycollabration = async(req,res) =>
+{
+    const id = req.user._id;
+    const projects = projectservice.getcollabration(id)
+
+
+    res.render("mycollabration",{projects})
+}
+
+
+exports.searchProjects = async(req,res) =>
+
+{
+
+
+    res.render("searchproject")
+
+}
+exports.searchResults = async(req,res) =>
+
+{
+
+
+    res.render("")
+}
+
