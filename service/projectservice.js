@@ -96,3 +96,28 @@ exports.getProject = async() =>
   }
 }
 
+exports.getfollowingprojects = async() =>
+{
+  Project.findByIdAndUpdate(projectId,
+    {$pull:{requests:userId}},
+    {new: true, useFindAndModify: false}
+  )
+  .then((project) => {
+    console.log('Project updated:', project);
+  })
+  .catch((error) => {
+    console.error('Error updating project:', error);
+  })
+}
+
+
+exports.getMyProjectbyid = async(id) =>
+{
+  const project = await Project.findById(id)
+  .populate("collaborators")
+  .populate("requests")
+  return project
+
+}
+
+
