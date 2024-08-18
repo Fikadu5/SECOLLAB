@@ -78,4 +78,21 @@ exports.getProjectById = async (projectId) => {
   }
 };
 
+exports.getUserProjects = async (userId) => {
+  try {
+    return await Project.find({ user_id: userId });
+  } catch (error) {
+    throw new Error('Error fetching user projects');
+  }
+};
+exports.getProject = async() =>
+{
+  try{
+    return await project.find().limit(5).populate("tags");
+  }
+  catch(error)
+  {
+  throw new Error("Error fetching projects");
+  }
+}
 
