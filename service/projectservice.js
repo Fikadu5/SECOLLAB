@@ -39,3 +39,111 @@ exports.gettags = async() =>
 
   }
 
+
+exports.searchProjects = async(query) =>
+{
+  const project = Project.find({$title:{$search:query}});
+  return project;
+}
+
+
+exports.getMyProject = async (id) => {
+  try {
+   
+    const projects = await Project.find({ owner: id});
+
+    // If projects are found, send them back to the client
+    if (projects) {
+      console.log("project found")
+      // res.status(200).json(projects);
+        return projects
+    } else {
+      // If no projects are found, send an appropriate message
+      console.log("no project is found")
+    }
+  } catch (error) {
+    // Handle any errors that occur during the database query
+    console.log("An error occurred while fetching projects.", error );
+  }
+};
+exports.getProjectById = async (projectId) => {
+  try {
+    return await Project.findById(projectId)
+    .populate("owner")
+    .populate("tags")
+    .populate("requests")
+    .populate("collaborators");
+  } catch (error) {
+    throw new Error('Error fetching project');
+  }
+};
+
+exports.getUserProjects = async (userId) => {
+  try {
+    return await Project.find({ user_id: userId });
+  } catch (error) {
+    throw new Error('Error fetching user projects');
+  }
+};
+exports.getProject = async() =>
+{
+  try{
+    return await project.find().limit(5).populate("tags");
+  }
+  catch(error)
+  {
+  throw new Error("Error fetching projects");
+  }
+}
+
+exports.getfollowingprojects = async() =>
+{
+  Project.findByIdAndUpdate(projectId,
+    {$pull:{requests:userId}},
+    {new: true, useFindAndModify: false}
+  )
+  .then((project) => {
+    console.log('Project updated:', project);
+  })
+  .catch((error) => {
+    console.error('Error updating project:', error);
+  })
+}
+
+
+exports.getMyProjectbyid = async(id) =>
+{
+  const project = await Project.findById(id)
+  .populate("collaborators")
+  .populate("requests")
+  return project
+
+}
+
+exports.getcollabration = async(id) =>
+{
+  try{
+  const project = await Project.find({collaborators:id});
+  return project
+  }
+  catch(err)
+  {
+    console.log(err);
+  }
+}
+
+
+exports.deleteproject = async(id) =>
+{
+  try{
+    const project = Project.deleteOne({_id:id})
+    return project;
+
+  }
+  catch(err)
+  {
+    console.log(err)
+  }
+}
+
+
