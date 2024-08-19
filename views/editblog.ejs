@@ -14,6 +14,23 @@
   <%- include("navigationloggedin") %>
 
   <%- include("sidebar") %>
+  <% if (messages && messages.success && messages.success.length > 0) { %>
+    <div class="alert alert-success">
+        <%= messages.success %>
+    </div>
+<% } %>
+
+<% if (messages && messages.error && messages.error.length > 0) { %>
+    <div class="alert alert-danger">
+        <%= messages.error %>
+    </div>
+<% } %>
+
+<% if (messages && messages.length > 0) { %>
+    <div class="alert alert-info">
+        <%= messages %>
+    </div>
+<% } %>
   <form action="/editblog/<%= blog._id %>" method="POST">
     <label for="title">Title</label>
     <input type="text" id="title" name="title" value="<%= blog.title %>">
