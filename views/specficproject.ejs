@@ -14,6 +14,24 @@
 <body>
 <%- include("navigationloggedin") %>
 <%- include("sidebar") %>
+
+<% if (messages && messages.success && messages.success.length > 0) { %>
+  <div class="alert alert-success">
+      <%= messages.success %>
+  </div>
+<% } %>
+
+<% if (messages && messages.error && messages.error.length > 0) { %>
+  <div class="alert alert-danger">
+      <%= messages.error %>
+  </div>
+<% } %>
+
+<% if (messages && messages.length > 0) { %>
+  <div class="alert alert-info">
+      <%= messages %>
+  </div>
+<% } %>
   <div class="container">
     <h1><%= project.title %></h1>
     <% if (project.tags && project.tags.length > 0) { %>
