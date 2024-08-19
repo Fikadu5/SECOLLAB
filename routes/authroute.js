@@ -6,6 +6,7 @@ const { ensureAuthenticated } = require('../middleware/authMiddleware');
 const multer = require('multer');
 const path = require('path');
 const passportLocalMongoose = require('passport-local-mongoose');
+const flash = require('connect-flash');
 
 const storage = multer.diskStorage({
   destination: 'public/uploads/',
@@ -93,9 +94,13 @@ router.post('/signup', (req, res) => {
 
 
 router.get('/login', (req, res) => {
-  res.render('login');
+  res.render('login', {
+    messages: {
+      success: req.flash('success') , 
+      error: req.flash('error')    
+    }
+  });
 });
-
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
     if (err) {
@@ -128,8 +133,11 @@ router.get('/logout', (req, res) => {
 });
 
 router.get('/signup', (req, res) => {
-  res.render('signup');
-});
+  res.render('signup', { messages: {
+        success: req.flash('success'),
+        error: req.flash('error' )}
+  })
+      });
 
 router.get("/changepassword", ensureAuthenticated, (req, res) => {
   try {

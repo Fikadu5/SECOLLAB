@@ -1,11 +1,15 @@
 const blog = require('../models/blog');
 const User = require("../models/user");
 const blogService = require('../services/blogservice');
-const userService = require('../services/userservice');
+
 const multer = require('multer');
 const path = require('path');
 const Blog = require('../models/blog');
 const BlogTag = require('../models/Blogtag');
+const flash = require('connect-flash');
+const userService = require('../services/userservice');
+
+
 
 
 
@@ -14,9 +18,14 @@ exports.getsearchresult = async(req,res) =>
   try{
   const query = req.params.text;
   const blogs = blogService.getsearchresult(query);
+  const currentuser =  userService.getUserById(req.user._id);
   if(blogs)
   {
-    res.render("searchblogs",{blogs})
+    res.render("searchblogs",{blogs,
+       messages: {
+        success: req.flash('success'),
+        error: req.flash('error')
+      }, currentuser})
 
   }
   else{
@@ -32,7 +41,13 @@ catch(err)
 exports.getFollowingBlogs = async(req,res) =>
 {
   const blogs = await blogService.getFollowingBlogs(req.user._id);
-  res.render("allblog",{blogs})
+  const currentuser =  userService.getUserById(req.user._id);
+  res.render("allblog",{blogs,messages: {
+        success: req.flash('success'),
+        error: req.flash('error')
+      }, 
+      currentuser
+    })
 }
 exports.getBlogs = async (req, res) => {
 
@@ -40,7 +55,12 @@ exports.getBlogs = async (req, res) => {
   try {
     const blogs = await blogService.getBlogs(req.user._id);
     const currentUser = await userService.getUserById(req.user._id)
-    res.render('allblog', { blogs, currentUser });
+    const currentuser =  userService.getUserById(req.user._id);
+    res.render('allblog', { blogs, currentUser,messages: {
+        success: req.flash('success'),
+        error: req.flash('error')
+      }, 
+      currentuser});
   } catch (err) {
     console.error("Error rendering 'blogs' view:", err);
     res.status(500).send("Error occurred while rendering the blogs view.");
@@ -51,6 +71,7 @@ exports.deleteBlog = async(req,res) => {
       const id = req.params.id;
       const userid = req.user._id;
       const deleteblog = await blogService.deleteBlog(id,userid);
+      const currentuser =  userService.getUserById(req.user._id);
       if(deleteblog)
       {
         console.log("successfully deleted the blog");
@@ -74,6 +95,7 @@ exports.getMyBlogs = async (req, res) => {
     const page = req.query.page ? parseInt(req.query.page) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit) : 10; // Default limit to 10 if not provided
     const totalBlogsCount = await Blog.countDocuments({ owner: req.user._id }).exec();
+    const currentuser =  userService.getUserById(req.user._id);
     
     const blogs = await blogService.getMyBlogs(req.user._id, page, limit);
     
@@ -84,7 +106,10 @@ exports.getMyBlogs = async (req, res) => {
       totalResults: totalBlogsCount
     };
 
-    res.render("myblogs", { blogs, pagination });
+    res.render("myblogs", { blogs, pagination,messages: {
+        success: req.flash('success'),
+        error: req.flash('error')
+      }, currentuser});
   } catch (e) {
     console.log(`error: ${e}`);
     res.status(500).send("Error occurred while fetching your blogs");
@@ -96,6 +121,7 @@ exports.getTopBlogs = async (req, res) => {
     const limit = req.query.limit ? parseInt(req.query.limit) : 5; // Default limit to 5 if not provided
     const totalBlogsCount = await Blog.countDocuments().exec();
     const blogs = await blogService.getTopBlogs(page, limit,req.user._id)
+    const currentuser =  userService.getUserById(req.user._id);
 
     const pagination = {
       currentPage: page,
@@ -104,7 +130,10 @@ exports.getTopBlogs = async (req, res) => {
       totalResults: totalBlogsCount
     };
 
-    res.render('allblog', { blogs, pagination });
+    res.render('allblog', { blogs, pagination,currentuser, messages: {
+      success: req.flash('success'),
+      error: req.flash('error')
+    }  });
   } catch (err) {
     console.log("Error rendering top blogs,", err);
     res.status(500).send("Error occurred while rendering the blogs view");
@@ -145,8 +174,14 @@ catch(err)
 
 exports.newRoute = async (req, res) => {
   console.log("In newRoute controller");
-  const tags = await blogService.gettags()
-  res.render('newblog',{tags});
+  const tags = await blogService.gettags();
+  const currentuser =  userService.getUserById(req.user._id);
+  res.render('newblog',{tags,
+    messages: {
+        success: req.flash('success'),
+        error: req.flash('error')
+      },currentuser
+   });
 };
 
 exports.getBlogById = async (req, res) => {
@@ -156,7 +191,14 @@ exports.getBlogById = async (req, res) => {
     try {
       const blog = await blogService.getBlogById(id);
       const user = await userService.getUserById(req.user._id);
-      res.render('specficblog', { blog, user });
+      res.render('specficblog', { 
+        blog, 
+        user,
+        messages: {
+        success: req.flash('success'),
+        error: req.flash('error')
+      },currentuser
+        });
     } catch (error) {
       console.error('Error fetching blog:', error);
       res.status(500).send('Internal Server Error');
@@ -226,8 +268,14 @@ exports.editBlog = async (req, res) => {
     const id = req.params.id;
     try {
       const blog = await blogService.getBlogById(id);
+      const currentuser =  userService.getUserById(req.user._id);
       if (blog.owner.equals(req.user._id)) {
-        res.render('editblog', { blog });
+        res.render('editblog', { blog,
+          messages: {
+          success: req.flash('success'),
+          error: req.flash('error')
+      },currentuser
+          });
       } else {
         res.status(403).send('Unauthorized');
       }
@@ -267,6 +315,7 @@ exports.getotherUsersblogs = async(req,res) =>
     const page = req.query.page ? parseInt(req.query.page) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit) : 3;
     const blogs = await blogService.getUserBlogs(req.params.id,page,limit);
+    const currentuser =  userService.getUserById(req.user._id);
 
     const totalBlogsCount = await Blog.countDocuments({ owner: { $ne: req.params.id } }).exec();
     
@@ -278,7 +327,12 @@ exports.getotherUsersblogs = async(req,res) =>
       limit: limit,
       totalResults: totalBlogsCount
     };
-    res.render('allblog', { pagination });
+    res.render('allblog', { pagination,
+      messages: {
+        success: req.flash('success'),
+        error: req.flash('error')
+      },currentuser
+     });
   } catch (error) {
     console.error('Error fetching user blogs:', error);
     res.status(500).send('Internal Server Error');
@@ -287,10 +341,16 @@ exports.getotherUsersblogs = async(req,res) =>
 }
 exports.getUserBlogs = async (req, res) => {
   console.log("In getUserBlogs controller");
+  const currentuser =  userService.getUserById(req.user._id);
   if (req.isAuthenticated()) {
     try {
       const blogs = await blogService.getUserBlogs(req.user._id);
-      res.render('myblogs', { blogs });
+      res.render('myblogs', { blogs,
+       messages: {
+        success: req.flash('success'),
+        error: req.flash('error')
+      },currentuser
+       });
     } catch (error) {
       console.error('Error fetching user blogs:', error);
       res.status(500).send('Internal Server Error');
@@ -307,6 +367,7 @@ exports.getRandomBlogs = async (req, res) => {
     const page = req.query.page ? parseInt(req.query.page) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit) : 3; // Default limit to 3 if not provided
     const totalBlogsCount = await Blog.countDocuments({ owner: { $ne: userId } }).exec();
+    const currentuser =  userService.getUserById(req.user._id);
     
     const blogs = await blogService.getRandomBlogs(userId, page, limit);
 
@@ -317,7 +378,12 @@ exports.getRandomBlogs = async (req, res) => {
       totalResults: totalBlogsCount
     };
 
-    res.render('allblog', { blogs, pagination });
+    res.render('allblog', { blogs, pagination,
+        messages: {
+        success: req.flash('success'),
+        error: req.flash('error')
+      },currentuser
+     });
   } catch (err) {
     console.log("Error rendering random blogs,", err);
     res.status(500).send("Error occurred while rendering the blogs view");
@@ -328,7 +394,8 @@ exports.getRandomBlogs = async (req, res) => {
 exports.getcatagories = async(req,res) =>
 {
   const tags = await blogService.gettags();
-  res.render("Blogcatagories",{ tags } )
+  const currentuser =  userService.getUserById(req.user._id);
+  res.render("Blogcatagories",{ tags,currentuser } )
 }
 
 exports.newtag = async(req,res) =>
@@ -343,6 +410,14 @@ exports.newtag = async(req,res) =>
 
 exports.getcatblogs = async(req,res) =>
 {
-  const blogs = await blogService.getcatblogs(req.params.name)
-  res.render("allblog",{blogs})
-}
+  const blogs = await blogService.getcatblogs(req.params.name);
+  const currentuser =  userService.getUserById(req.user._id);
+  res.render("allblog",{
+    blogs,
+    messages: {
+        success: req.flash('success'),
+        error: req.flash('error')
+      },currentuser
+})
+  }
+
