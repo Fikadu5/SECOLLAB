@@ -131,3 +131,44 @@ describe('deleteproject', () => {
 
             expect(result).toBe(false);
         });
+	 it('should return project when given a valid ID', async () => {
+            const mockProject = {
+              _id: new mongoose.Types.ObjectId(),
+              owner: {},
+              tags: [],
+              requests: [],
+              collaborators: []
+            };
+
+            Project.findById.mockResolvedValue(mockProject);
+
+            const result = await getProjectById(mockProject._id);
+
+            expect(result).toEqual(mockProject);
+            expect(Project.findById).toHaveBeenCalledWith(mockProject._id);
+          });
+          it('should return projects when given a valid user ID', async () => {
+            const mockProjects = [{ name: 'Project1' }, { name: 'Project2' }];
+            Project.find.mockResolvedValue(mockProjects);
+
+            const userId = 'validUserId';
+            const result = await getUserProjects(userId);
+
+            expect(Project.find).toHaveBeenCalledWith({ user_id: userId });
+            expect(result).toEqual(mockProjects);
+          });
+              // Retrieve project by valid ID
+    it('should return project when ID is valid', async () => {
+        const mockProject = { _id: 'validId', name: 'Test Project', collaborators: [], requests: [] };
+        jest.spyOn(Project, 'findById').mockResolvedValue(mockProject);
+
+        const result = await getMyProjectbyid('validId');
+
+        expect(result).toEqual(mockProject);
+        expect(Project.findById).toHaveBeenCalledWith('validId');
+      });
+
+
+});
+
+
