@@ -217,3 +217,138 @@ it('should render deleteaccount with the current user when user ID is found', as
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({ message: "follows the user" });
     });
+
+        // Invalid user ID format
+        it('should return 400 and error message when user ID format is invalid', async () => {
+          const req = {
+            user: { _id: 'followerId' },
+            params: { id: 'invalidId' }
+          };
+          const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn()
+          };
+
+          userService.checkfollowing = jest.fn().mockResolvedValue(false);
+
+          await checkfollow(req, res);
+
+          expect(userService.checkfollowing).toHaveBeenCalledWith('followerId', 'invalidId');
+          expect(res.status).toHaveBeenCalledWith(400);
+          expect(res.json).toHaveBeenCalledWith({ message: "does not follow the userS" });
+        });
+            // Fetch followers successfully when valid user ID is provided
+    it('should fetch followers successfully when valid user ID is provided', async () => {
+      const req = {
+        query: { page: '1', limit: '10' },
+        user: { _id: 'validUserId' },
+        flash: jest.fn()
+      };
+      const res = {
+        render: jest.fn(),
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn()
+      };
+      const paginatedFollowers = [{ id: 1, name: 'Follower1' }];
+      const currentuser = { id: 'validUserId', name: 'CurrentUser' };
+
+      userService.getmyFollowers = jest.fn().mockResolvedValue(paginatedFollowers);
+      userService.getUserById = jest.fn().mockReturnValue(currentuser);
+
+      await getMyFollowers(req, res);
+
+      expect(userService.getmyFollowers).toHaveBeenCalledWith('validUserId', 1, 10);
+      expect(userService.getUserById).toHaveBeenCalledWith('validUserId');
+      expect(res.render).toHaveBeenCalledWith("myfollowers", {
+        paginatedFollowers,
+        messages: { success: undefined, error: undefined },
+        currentuser
+      });
+    });
+        // Handle invalid page and limit query parameters
+        it('should handle invalid page and limit query parameters', async () => {
+          const req = {
+            query: { page: 'invalid', limit: 'invalid' },
+            user: { _id: 'validUserId' },
+            flash: jest.fn()
+          };
+          const res = {
+            render: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn()
+          };
+          const paginatedFollowers = [{ id: 1, name: 'Follower1' }];
+          const currentuser = { id: 'validUserId', name: 'CurrentUser' };
+
+
+          userService.getmyFollowers = jest.fn().mockResolvedValue(paginatedFollowers);
+          userService.getUserById = jest.fn().mockReturnValue(currentuser);
+
+          await getMyFollowers(req, res);
+
+          expect(userService.getmyFollowers).toHaveBeenCalledWith('validUserId', 1, 10);
+          expect(userService.getUserById).toHaveBeenCalledWith('validUserId');
+          expect(res.render).toHaveBeenCalledWith("myfollowers", {
+            paginatedFollowers,
+            messages: { success: undefined, error: undefined },
+            currentuser
+          });
+        });
+
+            // Retrieves the correct page of following users
+    it('should retrieve the correct page of following users when valid page and limit are provided', async () => {
+      const req = {
+        query: { page: '2', limit: '5' },
+        user: { _id: 'user123' },
+        flash: jest.fn()
+      };
+      const res = {
+        render: jest.fn()
+      };
+      const following = [{ id: 'user1' }, { id: 'user2' }];
+      const currentuser = { id: 'user123', name: 'John Doe' };
+
+      userService.getMyFollowing = jest.fn().mockResolvedValue(following);
+      userService.getUserById = jest.fn().mockResolvedValue(currentuser);
+
+      await getMyFollwing(req, res);
+
+      expect(userService.getMyFollowing).toHaveBeenCalledWith('user123', 2, 5);
+      expect(userService.getUserById).toHaveBeenCalledWith('user123');
+      expect(res.render).toHaveBeenCalledWith('myfollowing', {
+        following,
+        currentuser,
+        messages: {
+          success: req.flash('success'),
+          error: req.flash('error')
+        }
+      });
+    });    // Handles missing or invalid page and limit query parameters
+    it('should handle missing or invalid page and limit query parameters by using default values', async () => {
+      const req = {
+        query: { page: 'invalid', limit: null },
+        user: { _id: 'user123' },
+        flash: jest.fn()
+      };
+      const res = {
+        render: jest.fn()
+      };
+      const following = [{ id: 'user1' }, { id: 'user2' }];
+      const currentuser = { id: 'user123', name: 'John Doe' };
+
+      userService.getMyFollowing = jest.fn().mockResolvedValue(following);
+      userService.getUserById = jest.fn().mockResolvedValue(currentuser);
+
+      await getMyFollwing(req, res);
+
+      expect(userService.getMyFollowing).toHaveBeenCalledWith('user123', 1, 10);
+      expect(userService.getUserById).toHaveBeenCalledWith('user123');
+      expect(res.render).toHaveBeenCalledWith('myfollowing', {
+        following,
+        currentuser,
+        messages: {
+          success: req.flash('success'),
+          error: req.flash('error')
+        }
+      });
+    });
