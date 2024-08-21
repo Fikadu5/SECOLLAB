@@ -149,3 +149,69 @@
       const result = await checklike('blog1', 'user1');
       expect(result).toBe(200);
     });
+ it('should return 201 when blog ID does not exist in the database', async () => {
+      Blog.findById.mockResolvedValue(null);
+
+      const result = await checklike('nonexistentBlog', 'user1');
+      expect(result).toBe(201);
+    });
+    it('should return all tags when they exist in the database', async () => {
+      const mockTags = [{ name: 'tag1' }, { name: 'tag2' }];
+      jest.spyOn(BlogTag, 'find').mockResolvedValue(mockTags);
+
+      const result = await gettags();
+
+      expect(result).toEqual(mockTags);
+      BlogTag.find.mockRestore();
+    });
+    it('should create a new BlogTag when valid name and slug are provided', async () => {
+      const mockSave = jest.fn().mockResolvedValue(true);
+      BlogTag.mockImplementation(() => ({
+        save: mockSave
+      }));
+
+      const name = 'Tech';
+      const slug = 'tech';
+      const result = await newtag(name, slug);
+
+      expect(BlogTag).toHaveBeenCalledWith({ name, slug });
+      expect(mockSave).toHaveBeenCalled();
+      expect(result).toEqual(expect.objectContaining({ name, slug }));
+    });
+        // Retrieve blogs associated with a valid tag name
+        it('should return blogs when a valid tag name is provided', async () => {
+          const mockTag = { _id: 'validObjectId' };
+          const mockBlogs = [{ title: 'Blog 1' }, { title: 'Blog 2' }];
+
+          // Mock BlogTag.findOne to return the mock tag
+          jest.spyOn(BlogTag, 'findOne').mockResolvedValue(mockTag);
+
+          // Mock Blog.find to return a query object that supports chaining methods
+          const mockQuery = {
+            sort: jest.fn().mockReturnThis(),
+            populate: jest.fn().mockResolvedValue(mockBlogs),
+          };
+          jest.spyOn(Blog, 'find').mockReturnValue(mockQuery);
+
+          // Call the function
+          const result = await getcatblogs('validTagName');
+
+          // Assertions
+          expect(BlogTag.findOne).toHaveBeenCalledWith({ name: 'validTagName' });
+          expect(Blog.find).toHaveBeenCalledWith({ tags: { $in: [mockTag._id] } });
+          expect(mockQuery.sort).toHaveBeenCalledWith({ created_at: 1 });
+          expect(mockQuery.populate).toHaveBeenCalledWith('tags');
+          expect(result).toEqual(mockBlogs);
+        });
+
+
+
+
+
+
+
+
+
+        afterEach(() => {
+          jest.clearAllMocks();
+        });
