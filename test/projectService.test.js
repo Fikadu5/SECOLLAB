@@ -69,3 +69,40 @@ describe('deleteproject', () => {
     expect(result).toEqual(expectedProjects);
   });
 
+  it('should handle errors from Project.find gracefully', async () => {
+    const collaboratorId = 'anyId';
+    
+    // Mock Project.find to throw an error
+    const mockFind = jest.fn().mockRejectedValue(new Error('Database Error'));
+    Project.find = mockFind;
+
+    // Call the function being tested
+    const result = await getcollabration(collaboratorId);
+
+    // Assert that the mock was called and no projects were returned
+    expect(mockFind).toHaveBeenCalled();
+    expect(result).toBeUndefined(); // or handle errors accordingly if you have error handling
+  });
+  
+ 
+      // Successfully registers interest when project exists and user is not already registered
+      it('should register interest successfully when project exists and user is not already registered', async () => {
+        const projectId = 'projectId';
+        const userId = 'userId';
+    
+        const project = {
+          _id: projectId,
+          requests: [],
+          collaborators: [],
+          save: jest.fn().mockResolvedValue(true)
+        };
+    
+        jest.spyOn(Project, 'findById').mockResolvedValue(project);
+    
+        const result = await registerInterest(projectId, userId);
+    
+        expect(Project.findById).toHaveBeenCalledWith(projectId);
+        expect(project.requests).toContain(userId);
+        expect(project.save).toHaveBeenCalled();
+        expect(result).toBe(true);
+      });
