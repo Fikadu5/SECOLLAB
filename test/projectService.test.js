@@ -106,3 +106,28 @@ describe('deleteproject', () => {
         expect(project.save).toHaveBeenCalled();
         expect(result).toBe(true);
       });
+	      // Returns false when project does not exist
+    it('should return false when project does not exist', async () => {
+        const projectId = 'validProjectId';
+        const userId = 'validUserId';
+        Project.findById = jest.fn().mockResolvedValue(null);
+
+        const result = await registerInterest(projectId, userId);
+
+        expect(result).toBe(false);
+    });
+        // Returns false when user is already a collaborator
+        it('should return false when user is already a collaborator', async () => {
+            const projectId = 'validProjectId';
+            const userId = 'validUserId';
+            const mockProject = {
+                requests: [],
+                collaborators: [userId],
+                save: jest.fn().mockResolvedValue(true)
+            };
+            Project.findById = jest.fn().mockResolvedValue(mockProject);
+
+            const result = await registerInterest(projectId, userId);
+
+            expect(result).toBe(false);
+        });
