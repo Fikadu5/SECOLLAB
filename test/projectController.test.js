@@ -60,3 +60,17 @@ jest.mock('../services/projectservice');
         });
       });
 
+      it('should retrieve tags and render project categories when tags are available', async () => {
+        const req = { user: { _id: '123' } };
+        const res = { render: jest.fn() };
+        const tags = ['tag1', 'tag2'];
+  
+        jest.spyOn(projectservice, 'gettags').mockResolvedValue(tags);
+        jest.spyOn(userService, 'getUserById').mockResolvedValue({ id: '123', name: 'John Doe' });
+  
+        await getcatagories(req, res);
+  
+        expect(projectService.gettags).toHaveBeenCalled();
+        expect(userService.getUserById).toHaveBeenCalledWith('123');
+        expect(res.render).toHaveBeenCalledWith('projectcatagories', { tags, currentuser: { id: '123', name: 'John Doe' } });
+      });
