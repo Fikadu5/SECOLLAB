@@ -141,4 +141,79 @@ it('should render deleteaccount with the current user when user ID is found', as
           expect(res.json).toHaveBeenCalledWith({ message: "successfully subscribed" });
         });
             // User tries to follow themselves
+    it('should return 400 and failure message when user tries to follow themselves', async () => {
+      const req = {
+        user: { _id: 'user1' },
+        params: { id: 'user1' }
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn()
+      };
+      const followUserMock = jest.spyOn(userService, 'followUser').mockResolvedValue(false);
 
+      await followUser(req, res);
+
+      expect(followUserMock).toHaveBeenCalledWith('user1', 'user1');
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ message: "Failed to follow user" });
+    });
+
+
+    // Successfully unfollows a user when valid follower and following IDs are provided
+    it('should return 200 and success message when valid follower and following IDs are provided', async () => {
+      const req = {
+        params: { id: 'followingId123' },
+        user: { _id: 'followerId123' }
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn()
+      };
+     
+      userService.unfollow = jest.fn().mockResolvedValue(true);
+
+      await unfollow(req, res);
+
+      expect(userService.unfollow).toHaveBeenCalledWith('followerId123', 'followingId123');
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({ "message": "sucessfully unfollowed" });
+    });
+        // Handles the case where the follower ID or following ID is invalid or missing
+        it('should return 500 and error message when follower ID or following ID is invalid or missing', async () => {
+          const req = {
+            params: { id: null },
+            user: { _id: 'followerId123' }
+          };
+          const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn()
+          };
+        
+          userService.unfollow = jest.fn().mockResolvedValue(false);
+    
+          await unfollow(req, res);
+    
+          expect(userService.unfollow).toHaveBeenCalledWith('followerId123', null);
+          expect(res.status).toHaveBeenCalledWith(500);
+          expect(res.json).toHaveBeenCalledWith({ "message": "sucessfully unfollowed" });
+        });
+            // User follows another user successfully
+    it('should return 200 and success message when user follows another user successfully', async () => {
+      const req = {
+        user: { _id: 'followerId' },
+        params: { id: 'followingId' }
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn()
+      };
+     
+      userService.checkfollowing = jest.fn().mockResolvedValue(true);
+
+      await checkfollow(req, res);
+
+      expect(userService.checkfollowing).toHaveBeenCalledWith('followerId', 'followingId');
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({ message: "follows the user" });
+    });
