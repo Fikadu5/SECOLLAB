@@ -126,3 +126,98 @@
       expect(res.redirect).toHaveBeenCalledWith('/myblogs');
     });
 
+    // Handles case when there are no blogs available
+    it('should render the view with empty blogs and pagination when no blogs are available', async () => {
+      const req = {
+        user: { _id: 'userId' },
+        query: { page: '1', limit: '10' },
+        flash: jest.fn()
+      };
+      const res = {
+        render: jest.fn(),
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+      const mockUser = { name: 'Test User' };
+  
+      jest.spyOn(Blog, 'countDocuments').mockReturnValue({ exec: jest.fn().mockResolvedValue(0) });
+      jest.spyOn(userService, 'getUserById').mockResolvedValue(mockUser);
+      jest.spyOn(blogService, 'getRandomBlogs').mockResolvedValue([]);
+  
+      await getRandomBlogs(req, res);
+  
+      expect(Blog.countDocuments).toHaveBeenCalledWith({ owner: { $ne: 'userId' } });
+      expect(userService.getUserById).toHaveBeenCalledWith('userId');
+      expect(blogService.getRandomBlogs).toHaveBeenCalledWith('userId', 1, 10);
+      expect(res.render).toHaveBeenCalledWith('allblog', {
+        blogs: [],
+        pagination: {
+          currentPage: 1,
+          totalPages: 0,
+          limit: 10,
+          totalResults: 0
+        },
+        messages: {
+          success: req.flash('success'),
+          error: req.flash('error')
+        },
+        currentuser: mockUser
+      });
+    });
+        // Successfully fetches random blogs for a user
+        it('should fetch random blogs and render the view with pagination when blogs are available', async () => {
+          const req = {
+            user: { _id: 'userId' },
+            query: { page: '1', limit: '10' },
+            flash: jest.fn()
+          };
+          const res = {
+            render: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn()
+          };
+          const mockBlogs = [{ title: 'Blog 1' }, { title: 'Blog 2' }];
+          const mockUser = { name: 'Test User' };
+      
+          jest.spyOn(Blog, 'countDocuments').mockReturnValue({ exec: jest.fn().mockResolvedValue(20) });
+          jest.spyOn(userService, 'getUserById').mockResolvedValue(mockUser);
+          jest.spyOn(blogService, 'getRandomBlogs').mockResolvedValue(mockBlogs);
+      
+          await getRandomBlogs(req, res);
+      
+          expect(Blog.countDocuments).toHaveBeenCalledWith({ owner: { $ne: 'userId' } });
+          expect(userService.getUserById).toHaveBeenCalledWith('userId');
+          expect(blogService.getRandomBlogs).toHaveBeenCalledWith('userId', 1, 10);
+          expect(res.render).toHaveBeenCalledWith('allblog', {
+            blogs: mockBlogs,
+            pagination: {
+              currentPage: 1,
+              totalPages: 2,
+              limit: 10,
+              totalResults: 20
+            },
+            messages: {
+              success: req.flash('success'),
+              error: req.flash('error')
+            },
+            currentuser: mockUser
+          });
+        });
+    // blogService.gettags() returns an empty array
+    it('should render Blogcatagories with empty tags array and currentuser when blogService.gettags() returns an empty array', async () => {
+      const req = { user: { _id: '123' } };
+      const res = { render: jest.fn() };
+      const tags = [];
+      const currentuser = { name: 'John Doe' };
+
+      jest.spyOn(blogService, 'gettags').mockResolvedValue(tags);
+      jest.spyOn(userService, 'getUserById').mockReturnValue(currentuser);
+
+      await getcatagories(req, res);
+
+      expect(blogService.gettags).toHaveBeenCalled();
+      expect(userService.getUserById).toHaveBeenCalledWith('123');
+      expect(res.render).toHaveBeenCalledWith('Blogcatagories', { tags, currentuser });
+    });
+    // Successfully retrieves tags from blogService
+
