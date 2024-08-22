@@ -82,3 +82,47 @@
             currentuser: { name: 'Test User' }
           });
         });
+ // Handles unauthorized user trying to update a blog
+        it('should return 403 when the user is unauthorized', async () => {
+          const req = {
+            params: { id: '123' },
+            body: { title: 'New Title', subtitle: 'New Subtitle', content: 'New Content' },
+            user: { _id: 'user123' }
+          };
+          const res = {
+            redirect: jest.fn(),
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn()
+          };
+
+          jest.spyOn(blogService, 'getBlogById').mockResolvedValue({ user_id: { equals: jest.fn().mockReturnValue(false) } });
+
+          await updateBlog(req, res);
+
+          expect(blogService.getBlogById).toHaveBeenCalledWith('123');
+          expect(res.status).toHaveBeenCalledWith(403);
+          expect(res.send).toHaveBeenCalledWith('Unauthorized');
+        });
+    // Successfully updates a blog when user is authorized
+    it('should update the blog when the user is authorized', async () => {
+      const req = {
+        params: { id: '123' },
+        body: { title: 'New Title', subtitle: 'New Subtitle', content: 'New Content' },
+        user: { _id: 'user123' }
+      };
+      const res = {
+        redirect: jest.fn(),
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn()
+      };
+
+      jest.spyOn(blogService, 'getBlogById').mockResolvedValue({ user_id: { equals: jest.fn().mockReturnValue(true) } });
+      jest.spyOn(blogService, 'updateBlogById').mockResolvedValue();
+
+      await updateBlog(req, res);
+
+      expect(blogService.getBlogById).toHaveBeenCalledWith('123');
+      expect(blogService.updateBlogById).toHaveBeenCalledWith('123', 'New Title', 'New Subtitle', 'New Content');
+      expect(res.redirect).toHaveBeenCalledWith('/myblogs');
+    });
+
