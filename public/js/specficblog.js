@@ -58,6 +58,7 @@ likebutton.addEventListener("click", () => {
     body: JSON.stringify({}) // include an empty object since you're not passing any data
   })
   .then(response => {
+   
     if (response.status === 200) {
       likecount--;
       likebutton.style.color = "grey";
