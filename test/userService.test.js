@@ -92,3 +92,81 @@ jest.mock('../models/user');
         expect(result.totalPages).toBe(1);
         expect(result.totalResults).toBe(mockCount);
       });
+  // Handles cases where the user ID has no followers
+    it('should return empty results when user ID has no followers', async () => {
+        const mockId = 'user123';
+        const mockFollowers = [];
+        const mockCount = 0;
+
+        jest.spyOn(Follow, 'find').mockReturnValue({
+          populate: jest.fn().mockReturnThis(),
+          skip: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockReturnThis(),
+          exec: jest.fn().mockResolvedValue(mockFollowers)
+        });
+        jest.spyOn(Follow, 'countDocuments').mockResolvedValue(mockCount);
+
+        const result = await getmyFollowers(mockId);
+
+        expect(result.results).toEqual(mockFollowers);
+        expect(result.currentPage).toBe(1);
+        expect(result.totalPages).toBe(0);
+        expect(result.totalResults).toBe(mockCount);
+      });
+          // Retrieves a paginated list of followings for a given user ID
+    it('should return paginated list of followings for a valid user ID', async () => {
+        const mockId = 'validUserId';
+        const mockPage = 1;
+        const mockLimit = 10;
+        const mockTotalFollowingCount = 15;
+        const mockTotalFollowing = [{ following: 'user1' }, { following: 'user2' }];
+
+        jest.spyOn(Follow, 'countDocuments').mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockTotalFollowingCount),
+        });
+        jest.spyOn(Follow, 'find').mockReturnValue({
+          populate: jest.fn().mockReturnThis(),
+          skip: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockReturnThis(),
+          exec: jest.fn().mockResolvedValue(mockTotalFollowing),
+        });
+
+        const result = await getMyFollowing(mockId, mockPage, mockLimit);
+
+        expect(result).toEqual({
+          results: mockTotalFollowing,
+          currentPage: mockPage,
+          totalPages: Math.ceil(mockTotalFollowingCount / mockLimit),
+          totalResults: mockTotalFollowingCount,
+          limit: mockLimit,
+        });
+      });
+          // User ID does not exist in the Follow collection
+    it('should return empty results when user ID does not exist', async () => {
+        const mockId = 'nonExistentUserId';
+        const mockPage = 1;
+        const mockLimit = 10;
+        const mockTotalFollowingCount = 0;
+        const mockTotalFollowing = [];
+
+        jest.spyOn(Follow, 'countDocuments').mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockTotalFollowingCount),
+        });
+        jest.spyOn(Follow, 'find').mockReturnValue({
+          populate: jest.fn().mockReturnThis(),
+          skip: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockReturnThis(),
+          exec: jest.fn().mockResolvedValue(mockTotalFollowing),
+        });
+
+        const result = await getMyFollowing(mockId, mockPage, mockLimit);
+
+        expect(result).toEqual({
+          results: mockTotalFollowing,
+          currentPage: mockPage,
+          totalPages: Math.ceil(mockTotalFollowingCount / mockLimit),
+          totalResults: mockTotalFollowingCount,
+          limit: mockLimit,
+        });
+      });
+
