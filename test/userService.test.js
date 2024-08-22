@@ -170,3 +170,88 @@ jest.mock('../models/user');
         });
       });
 
+          // Successfully follows a user when no existing follow record is found
+    it('should create a new follow record when no existing follow record is found', async () => {
+        const follower_id = 'follower123';
+        const following_id = 'following123';
+    
+        jest.spyOn(Follow, 'exists').mockResolvedValue(false);
+        const saveMock = jest.spyOn(Follow.prototype, 'save').mockResolvedValue(true);
+    
+        const result = await followUser(follower_id, following_id);
+    
+        expect(Follow.exists).toHaveBeenCalledWith({
+          follower: follower_id,
+          following: following_id,
+        });
+        expect(saveMock).toHaveBeenCalled();
+        expect(result).toBe(true);
+      });
+
+          // Successfully deletes a follow relationship between two users
+    it('should successfully delete a follow relationship when valid follower and following IDs are provided', async () => {
+        const follower = 'user1';
+        const following = 'user2';
+    
+        const mockDeleteOne = jest.spyOn(Follow, 'deleteOne').mockResolvedValue({ deletedCount: 1 });
+    
+        const result = await unfollow(follower, following);
+    
+        expect(mockDeleteOne).toHaveBeenCalledWith({ follower, following });
+        expect(result).toEqual({ deletedCount: 1 });
+    
+        mockDeleteOne.mockRestore();
+      });
+
+          // Follower or following user ID does not exist
+    it('should handle error when follower or following user ID does not exist', async () => {
+        const follower = 'nonexistentUser';
+        const following = 'user2';
+    
+        const mockDeleteOne = jest.spyOn(Follow, 'deleteOne').mockRejectedValue(new Error('User not found'));
+        const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    
+        await unfollow(follower, following);
+    
+        expect(mockDeleteOne).toHaveBeenCalledWith({ follower, following });
+        expect(consoleSpy).toHaveBeenCalledWith("error deleting the data from the database");
+    
+        mockDeleteOne.mockRestore();
+        consoleSpy.mockRestore();
+      });
+     
+          // Handles non-existent follower_id and following_id gracefully
+    it('should return false when no follow record exists', async () => {
+        const mockFollow = {
+          findOne: jest.fn().mockResolvedValue(null)
+        };
+        jest.mock('../models/user', () => ({ Follow: mockFollow }));
+        const { checkfollowing } = require('../services/userservice');
+        const result = await checkfollowing('non_existent_follower_id', 'non_existent_following_id');
+        expect(result).toBe(false);
+      });
+          // Successfully find an existing follow relationship
+    it('should return the follow relationship when it exists', async () => {
+        const follower = 'user1';
+        const following = 'user2';
+        const mockFollow = { follower, following };
+    
+        jest.spyOn(Follow, 'findOne').mockResolvedValue(mockFollow);
+    
+        const result = await follow(follower, following);
+    
+        expect(result).toEqual(mockFollow);
+        expect(Follow.findOne).toHaveBeenCalledWith({ follower, following });
+      });
+          // Handle the case where the follow relationship does not exist
+    it('should return null when the follow relationship does not exist', async () => {
+        const follower = 'user1';
+        const following = 'user2';
+    
+        jest.spyOn(Follow, 'findOne').mockResolvedValue(null);
+    
+        const result = await follow(follower, following);
+    
+        expect(result).toBeNull();
+        expect(Follow.findOne).toHaveBeenCalledWith({ follower, following });
+      });
