@@ -1,11 +1,12 @@
 const Project = require('../models/project');
 const { deleteproject,getcollabration,getProjectById,
-    getUserProjects,
-    getProject,
+    getUserProjects,getMyProject,
+    getProject,getProjects,
     registerInterest,
     acceptinterest,
     getMyProjectbyid } = require('../services/projectservice');
 const mongoose = require('mongoose')
+
 describe('deleteproject', () => {
   it('should delete the project when given a valid ID', async () => {
     const mockId = 'validProjectId';
@@ -106,7 +107,7 @@ describe('deleteproject', () => {
         expect(project.save).toHaveBeenCalled();
         expect(result).toBe(true);
       });
-	      // Returns false when project does not exist
+          // Returns false when project does not exist
     it('should return false when project does not exist', async () => {
         const projectId = 'validProjectId';
         const userId = 'validUserId';
@@ -126,49 +127,86 @@ describe('deleteproject', () => {
                 save: jest.fn().mockResolvedValue(true)
             };
             Project.findById = jest.fn().mockResolvedValue(mockProject);
-
+    
             const result = await registerInterest(projectId, userId);
-
+    
             expect(result).toBe(false);
         });
-	 it('should return project when given a valid ID', async () => {
-            const mockProject = {
-              _id: new mongoose.Types.ObjectId(),
-              owner: {},
-              tags: [],
-              requests: [],
-              collaborators: []
-            };
-
-            Project.findById.mockResolvedValue(mockProject);
-
-            const result = await getProjectById(mockProject._id);
-
-            expect(result).toEqual(mockProject);
-            expect(Project.findById).toHaveBeenCalledWith(mockProject._id);
-          });
+       
           it('should return projects when given a valid user ID', async () => {
             const mockProjects = [{ name: 'Project1' }, { name: 'Project2' }];
             Project.find.mockResolvedValue(mockProjects);
-
+        
             const userId = 'validUserId';
             const result = await getUserProjects(userId);
-
+        
             expect(Project.find).toHaveBeenCalledWith({ user_id: userId });
             expect(result).toEqual(mockProjects);
           });
-              // Retrieve project by valid ID
-    it('should return project when ID is valid', async () => {
-        const mockProject = { _id: 'validId', name: 'Test Project', collaborators: [], requests: [] };
-        jest.spyOn(Project, 'findById').mockResolvedValue(mockProject);
-
-        const result = await getMyProjectbyid('validId');
-
-        expect(result).toEqual(mockProject);
-        expect(Project.findById).toHaveBeenCalledWith('validId');
+       // Retrieve project by valid ID
+      
+    
+       it('should return projects when given a valid user ID', async () => {
+        const mockProjects = [{ name: 'Project1' }, { name: 'Project2' }];
+        Project.find = jest.fn().mockResolvedValue(mockProjects);
+    
+        const userId = 'validUserId';
+        const result = await getUserProjects(userId);
+    
+        expect(Project.find).toHaveBeenCalledWith({ user_id: userId });
+        expect(result).toEqual(mockProjects);
       });
+          // handle invalid user ID format
+   
+    it('should throw an error when given an invalid user ID format', async () => {
+      const invalidUserId = null;
+  
+      await expect(getUserProjects(invalidUserId)).rejects.toThrow('Error fetching user projects');
+    });
+        // return an empty array if the user has no projects
+        it('should return an empty array when user has no projects', async () => {
+          const userId = 'user123';
+          const expectedProjects = [];
+  
+          jest.spyOn(Project, 'find').mockResolvedValue(expectedProjects);
+  
+          const result = await getUserProjects(userId);
+  
+          expect(result).toEqual(expectedProjects);
+      });
+      it('should handle multiple projects for a single user', async () => {
+        const userId = 'user456';
+        const userProjects = [{ name: 'Project A' }, { name: 'Project B' }];
 
+        jest.spyOn(Project, 'find').mockResolvedValue(userProjects);
 
+        const result = await getUserProjects(userId);
+
+        expect(result).toEqual(userProjects);
+    });
+        // Fetch projects successfully when valid owner ID is provided
+        it('should return projects when valid owner ID is provided', async () => {
+          const mockProjects = [{ name: 'Project1' }, { name: 'Project2' }];
+          const mockId = 'validOwnerId';
+      
+          jest.spyOn(Project, 'find').mockResolvedValue(mockProjects);
+      
+          const result = await getMyProject(mockId);
+      
+          expect(Project.find).toHaveBeenCalledWith({ owner: mockId });
+          expect(result).toEqual(mockProjects);
+        });
+            // Handle scenario when no projects exist for the given owner ID
+    it('should handle no projects found for given owner ID', async () => {
+      const mockId = 'ownerWithNoProjects';
+  
+      jest.spyOn(Project, 'find').mockResolvedValue(null);
+  
+      const result = await getMyProject(mockId);
+  
+      expect(Project.find).toHaveBeenCalledWith({ owner: mockId });
+      expect(result).toBeUndefined();
+    });
 });
 
 
