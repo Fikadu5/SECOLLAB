@@ -220,4 +220,144 @@
       expect(res.render).toHaveBeenCalledWith('Blogcatagories', { tags, currentuser });
     });
     // Successfully retrieves tags from blogService
+  it('should retrieve tags and render Blogcatagories with tags and currentuser when blogService.gettags() is successful', async () => {
+      const req = { user: { _id: '123' } };
+      const res = { render: jest.fn() };
+      const tags = ['tag1', 'tag2'];
+      const currentuser = { name: 'John Doe' };
+
+      jest.spyOn(blogService, 'gettags').mockResolvedValue(tags);
+      jest.spyOn(userService, 'getUserById').mockReturnValue(currentuser);
+
+      await getcatagories(req, res);
+
+      expect(blogService.gettags).toHaveBeenCalled();
+      expect(userService.getUserById).toHaveBeenCalledWith('123');
+      expect(res.render).toHaveBeenCalledWith('Blogcatagories', { tags, currentuser });
+    });
+        // Retrieves blogs by category name successfully
+        it('should retrieve blogs by category name successfully when blogs exist', async () => {
+          const req = {
+            params: { name: 'tech' },
+            user: { _id: 'user123' },
+            flash: jest.fn().mockReturnValue([])
+          };
+          const res = {
+            render: jest.fn()
+          };
+          const blogs = [{ title: 'Tech Blog 1' }, { title: 'Tech Blog 2' }];
+          const currentuser = { name: 'John Doe' };
+    
+          jest.spyOn(blogService, 'getcatblogs').mockResolvedValue(blogs);
+          jest.spyOn(userService, 'getUserById').mockReturnValue(currentuser);
+    
+          await getcatblogs(req, res);
+    
+          expect(blogService.getcatblogs).toHaveBeenCalledWith('tech');
+          expect(userService.getUserById).toHaveBeenCalledWith('user123');
+          expect(res.render).toHaveBeenCalledWith('allblog', {
+            blogs,
+            messages: {
+              success: [],
+              error: []
+            },
+            currentuser
+          });
+        });
+   
+    
+    // Successfully retrieves blogs followed by the user
+    it('should retrieve blogs followed by the user when user is following blogs', async () => {
+      const req = {
+        user: { _id: 'user123' },
+        flash: jest.fn().mockReturnValue([])
+      };
+      const res = {
+        render: jest.fn()
+      };
+      const blogs = [{ title: 'Blog 1' }, { title: 'Blog 2' }];
+      const currentuser = { name: 'John Doe' };
+
+      jest.spyOn(blogService, 'getFollowingBlogs').mockResolvedValue(blogs);
+      jest.spyOn(userService, 'getUserById').mockReturnValue(currentuser);
+
+      await getFollowingBlogs(req, res);
+
+      expect(blogService.getFollowingBlogs).toHaveBeenCalledWith('user123');
+      expect(userService.getUserById).toHaveBeenCalledWith('user123');
+      expect(res.render).toHaveBeenCalledWith('allblog', {
+        blogs,
+        messages: {
+          success: [],
+          error: []
+        },
+        currentuser
+      });
+    });
+        // User has no blogs they are following
+        it('should handle case when user is not following any blogs', async () => {
+          const req = {
+            user: { _id: 'user123' },
+            flash: jest.fn().mockReturnValue([])
+          };
+          const res = {
+            render: jest.fn()
+          };
+          const blogs = [];
+          const currentuser = { name: 'John Doe' };
+    
+          jest.spyOn(blogService, 'getFollowingBlogs').mockResolvedValue(blogs);
+          jest.spyOn(userService, 'getUserById').mockReturnValue(currentuser);
+    
+          await getFollowingBlogs(req, res);
+    
+          expect(blogService.getFollowingBlogs).toHaveBeenCalledWith('user123');
+          expect(userService.getUserById).toHaveBeenCalledWith('user123');
+          expect(res.render).toHaveBeenCalledWith('allblog', {
+            blogs,
+            messages: {
+              success: [],
+              error: []
+            },
+            currentuser
+          });
+        });
+            // User has already liked the blog post
+    it('should return 200 status and "already liked" message when user has already liked the blog post', async () => {
+      const req = {
+        user: { _id: 'user123' },
+        params: { id: 'blog123' }
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn()
+      };
+    
+      jest.spyOn(blogService, 'checklike').mockResolvedValue(200);
+
+      await checklike(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({ "message": "already liked" });
+    });
+
+
+        // User ID is missing or invalid
+        it('should handle missing or invalid user ID', async () => {
+          const req = {
+            user: { _id: null },
+            params: { id: 'blog123' }
+          };
+          const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn()
+          };
+         
+          jest.spyOn(blogService, 'checklike').mockResolvedValue(201);
+    
+          await checklike(req, res);
+    
+          expect(res.status).toHaveBeenCalledWith(201);
+          expect(res.json).toHaveBeenCalledWith({ "message": "not liked" });
+        });
 
