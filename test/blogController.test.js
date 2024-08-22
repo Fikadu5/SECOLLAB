@@ -1,23 +1,84 @@
-const { getBlogById } = require('../controllers/blogcontroller'); // Your controller
-const Blog = require('../models/blog'); // Your Blog model
+ const {getFollowingBlogs,
+      checklike,getsearchresult,updateBlog,
+      getcatblogs, getcatagories,getRandomBlogs} =require("../controllers/blogcontroller")
+    const blogService = require("../services/blogservice");
+    const userService = require("../services/userservice")
+    const httpMocks = require('node-mocks-http');
+    const { mockRequest, mockResponse } = httpMocks;
 
-jest.mock('../models/Blog'); // Mock Blog model
+    const Blog = require('../models/blog');
 
-describe('getBlogById', () => {
-  it('should call Blog.findById with the correct blogId', async () => {
-    const blogId = '789';
-    await getBlogById({ params: { id: blogId } }, { render: jest.fn() });
-    expect(Blog.findById).toHaveBeenCalledWith(blogId);
-  });
 
-  it('should handle errors gracefully', async () => {
-    Blog.findById.mockRejectedValue(new Error('Error fetching blog'));
-    const res = {
-      status: jest.fn(),
-      send: jest.fn(),
-    };
-    await getBlogById({ params: { id: '789' } }, res);
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.send).toHaveBeenCalledWith('Internal Server Error');
-  });
-});
+    jest.mock('../services/projectservice');
+
+
+        // User has no blogs they are following
+        it('should handle case when user is not following any blogs', async () => {
+          const req = {
+            user: { _id: 'user123' },
+            flash: jest.fn().mockReturnValue([])
+          };
+          const res = {
+            render: jest.fn()
+          };
+          const blogs = [];
+          const currentuser = { name: 'John Doe' };
+    
+          jest.spyOn(blogService, 'getFollowingBlogs').mockResolvedValue(blogs);
+          jest.spyOn(userService, 'getUserById').mockReturnValue(currentuser);
+    
+          await getFollowingBlogs(req, res);
+    
+          expect(blogService.getFollowingBlogs).toHaveBeenCalledWith('user123');
+          expect(userService.getUserById).toHaveBeenCalledWith('user123');
+          expect(res.render).toHaveBeenCalledWith('allblog', {
+            blogs,
+            messages: { success: [], error: [] },
+            currentuser
+          });
+        });
+    // Handles scenario where no blogs are found
+    it('should handle scenario where no blogs are found', async () => {
+      const req = {
+        params: { text: 'test' },
+        user: { _id: 'user123' },
+        flash: jest.fn().mockReturnValue([])
+      };
+      const res = {
+        render: jest.fn()
+      };
+  
+      jest.spyOn(blogService, 'getsearchresult').mockReturnValue(null);
+      jest.spyOn(userService, 'getUserById').mockReturnValue({ name: 'Test User' });
+      console.log = jest.fn();
+
+      await getsearchresult(req, res);
+
+      expect(blogService.getsearchresult).toHaveBeenCalledWith('test');
+      expect(console.log).toHaveBeenCalledWith('error with blogs');
+    });
+
+        // Retrieves search results based on query parameter
+        it('should retrieve search results based on query parameter', async () => {
+          const req = {
+            params: { text: 'test' },
+            user: { _id: 'user123' },
+            flash: jest.fn().mockReturnValue([])
+          };
+          const res = {
+            render: jest.fn()
+          };
+
+          jest.spyOn(blogService, 'getsearchresult').mockReturnValue([{ title: 'Test Blog' }]);
+          jest.spyOn(userService, 'getUserById').mockReturnValue({ name: 'Test User' });
+    
+          await getsearchresult(req, res);
+    
+          expect(blogService.getsearchresult).toHaveBeenCalledWith('test');
+          expect(userService.getUserById).toHaveBeenCalledWith('user123');
+          expect(res.render).toHaveBeenCalledWith('searchblogs', {
+            blogs: [{ title: 'Test Blog' }],
+            messages: { success: [], error: [] },
+            currentuser: { name: 'Test User' }
+          });
+        });
