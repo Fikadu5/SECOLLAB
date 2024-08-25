@@ -7,11 +7,13 @@ const multer = require('multer');
 const path = require('path');
 const passportLocalMongoose = require('passport-local-mongoose');
 const flash = require('connect-flash');
-
+const userService = require('../services/userservice');
+const bcrypt = require("bcrypt")
+// Setup Multer storage
 const storage = multer.diskStorage({
   destination: 'public/uploads/',
-  filename: function(req, file, cb){
-      cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+  filename: function(req, file, cb) {
+    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
   }
 });
 
@@ -19,42 +21,48 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage: storage,
   limits: { fileSize: 1000000 }, // 1MB limit
-  fileFilter: function(req, file, cb){
-      checkFileType(file, cb);
+  fileFilter: function(req, file, cb) {
+    checkFileType(file, cb);
   }
 }).single('image');
 
 // Check file type
-function checkFileType(file, cb){
-  // Allowed ext
+function checkFileType(file, cb) {
+  // Allowed extensions
   const filetypes = /jpeg|jpg|png|gif/;
-  // Check ext
+  // Check extension
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-  // Check mime
+  // Check mime type
   const mimetype = filetypes.test(file.mimetype);
 
-  if(mimetype && extname){
-      return cb(null, true);
+  if (mimetype && extname) {
+    return cb(null, true);
   } else {
-      cb('Error: Images Only!');
+    cb('Error: Images Only!');
   }
 }
 
-router.post('/signup', (req, res) => {
-  upload(req, res, (err) => {
-    if(err){
+// Signup route
+router.post('/signup',async (req, res) => {
+  upload(req, res, async (err) => {
+    if (err) {
       return res.status(400).send(err);
-    } 
-    if (!req.file) {
-      return res.status(400).send('Error: No File Selected!');
     }
-    
+
     const { fname, lname, username, twitter, phone_number, github, previous, country, city, skills, email, education_status, employment_status, age, about_me, password, confirm_password } = req.body;
     
-    if(password !== confirm_password) {
+    if (password !== confirm_password) {
+      req.flash('error','passwords do not match')
       return res.status(400).send('Error: Passwords do not match!');
     }
 
+   
+    const check_email = await User.find({email})
+    if (check_email)
+    {
+      req.flash('error','email already taken')
+    }
+    // Create user object
     const newUser = new User({
       fname,
       lname,
@@ -71,11 +79,12 @@ router.post('/signup', (req, res) => {
       employment_status,
       age,
       about_me,
-      image: req.file.filename,
+      image: req.file ? req.file.filename : "noprofile.jpg" 
     });
 
     User.register(newUser, password, (err, user) => {
       if (err) {
+        req.flash('error','error with account creation')
         console.log('Error with account creation:', err);
         return res.redirect('/authenticate/signup');
       }
@@ -90,9 +99,6 @@ router.post('/signup', (req, res) => {
     });
   });
 });
-  
-
-
 router.get('/login', (req, res) => {
   res.render('login', {
     messages: {
@@ -102,22 +108,30 @@ router.get('/login', (req, res) => {
   });
 });
 router.post('/login', (req, res, next) => {
-  passport.authenticate('local', (err, user, info) => {
+  passport.authenticate('local', { 
+    failureRedirect: '/authenticate/login', 
+    failureFlash: true, 
+    successRedirect: '/' 
+  }, (err, user, info) => {
     if (err) {
-      console.log('Error during login:', err);
+      console.error('Error during login:', err);
+      req.flash('error', 'An error occurred during login');
       return next(err);
     }
     if (!user) {
       console.log('Authentication failed:', info.message);
-      return res.redirect('/authenticate/login?error=' + encodeURIComponent(info.message));
+      req.flash('error', 'Email or password incorrect');
+      return res.redirect('/authenticate/login');
     }
     req.login(user, (err) => {
       if (err) {
-        console.log('Error logging in:', err);
+        console.error('Error logging in:', err);
+        req.flash('error', 'An error occurred during login');
         return next(err);
       }
       
       console.log('Login successful');
+      req.flash('success', 'Login successful!');
       return res.redirect('/');
     });
   })(req, res, next);
@@ -139,47 +153,80 @@ router.get('/signup', (req, res) => {
   })
       });
 
-router.get("/changepassword", ensureAuthenticated, (req, res) => {
+router.get("/changepassword", ensureAuthenticated, async(req, res) => {
   try {
-    
-      res.render("changepassword");
+    const currentuser = await userService.getUserById(req.user._id);
+      res.render("changepassword",{currentuser});
     
   } catch (err) {
     console.error("Error in /changepassword route:", err);
     return res.status(500).send("Internal server error");
   }
 });
-router.post("/changepassword",async (req,res) =>
-{
-  console.log("In the GET /changepassword route");
-    const userid = req.user._id;
-    console.log("User ID:", userid);
 
-    const user =User.findById(userid);
+
+// Route to handle password change
+router.post('/change-password', async (req, res) => {
+  const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
+  try {
+      // Ensure new passwords match
+      if (newPassword !== confirmNewPassword) {
+          return res.render('change-password', { messages: { error: 'New passwords do not match' } });
+      }
+
+      // Find the user from the session or database
+      const user = await User.findById(req.user._id); // Ensure req.user is populated with the logged-in user
 
       if (!user) {
-        console.error("User not found for ID:", userid);
-        return res.status(404).send("User not found");
+          return res.render('change-password', { messages: { error: 'User not found' } });
       }
-;
- 
-  const currentpassowrd = req.body.password;
-  const new_password = req.body.newpassword;
-  const confirm_password = req.body.confirmpassword;
-  if(confirm_password != new_password)
-  {
-    req.flash("the new password and the confirmation password does not match")
-    res.redirect("/changepassword")
-  }
-  const isMatch = await user.comparePassword(currentpassowrd);
-  if (!isMatch) {
-    // Current password is incorrect
-    return res.status(400).render('change-password', { error: 'Current password is incorrect' });
-  }
-  user.setPassword(new_password);
-  
 
-})
+      // Check if the current password is correct
+      const isMatch = await bcrypt.compare(currentPassword, user.hash); // Use user.hash to compare
+
+      if (!isMatch) {
+        req.flash('Current password is incorrect')
+          return res.render('changepassword', { messages: { error: 'Current password is incorrect' } });
+      }
+
+      // Hash the new password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+      // Update the user's password
+      user.hash = hashedPassword; // Update with the new hashed password
+      await user.save();
+        req.flash('succes','Password changed successfully')
+      res.render('changepassword', { messages: { success: 'Password changed successfully' } });
+  } catch (err) {
+      console.error(err);
+      res.render('changepassword', { messages: { error: 'An error occurred. Please try again later.' } });
+  }
+});
+
+
+router.get('/check-username', async (req, res) => {
+  const { username } = req.query;
+
+  if (!username) {
+    return res.status(400).json({ available: false, message: 'Username is required' });
+  }
+
+  try {
+    const user = await User.findOne({ username });
+    if (user) {
+      return res.json({ available: false, message: 'Username is already taken' });
+    }
+    res.json({ available: true });
+  } catch (err) {
+    console.error('Error checking username:', err);
+    res.status(500).json({ available: false, message: 'Server error' });
+  }
+});
+
+
+
+
 
 module.exports = router;
-
