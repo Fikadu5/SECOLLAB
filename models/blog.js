@@ -15,6 +15,10 @@ const blogSchema = new mongoose.Schema({
   subtitle: {
     type: String
   },
+  tags: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'BlogTag'
+  }],
   body: {
     type: String,
     required: true
@@ -33,12 +37,12 @@ const blogSchema = new mongoose.Schema({
     default: Date.now
   },
   image: {
-    type:String,
-  
+    type: String
   }
 });
-
+blogSchema.index({ title: 'text', body: 'text' });
 
 const Blog = mongoose.model('Blog', blogSchema);
 
 module.exports = Blog;
+

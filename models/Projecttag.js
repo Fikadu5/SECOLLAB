@@ -6,20 +6,14 @@ const projectTagSchema = new mongoose.Schema({
       type: String,
       required: true
     },
-    slug: {
+    description: {
       type: String,
       required: true,
       unique: true
     }
   });
   
-  // Generate slug automatically before saving
-//   projectTagSchema.pre('save', function(next) {
-//     if (this.isModified('name')) {
-//       this.slug = this.name.toLowerCase().replace(/ /g, '-');
-//     }
-//     next();
-//   });
+  
   
   const ProjectTag = mongoose.model('ProjectTag', projectTagSchema);
   

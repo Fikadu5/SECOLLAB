@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema({
     age: { type: Number, required: true },
     about_me: String,
     github: String,
-    profilephoto: String,
+   
     previous: { type: String, required: true },
     country: String,
     city: String,
@@ -42,12 +42,6 @@ userSchema.plugin(passportLocalMongoose, { usernameField: 'email' });
 const User = mongoose.model('User', userSchema);
 const Follow = mongoose.model('Follower', followerSchema);
 
-// UserSchema.methods.comparePassword = function(candidatePassword, cb) {
-//     bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
-//       if (err) return cb(err);
-//       cb(null, isMatch);
-//     });
-//   };
 
 module.exports = { User, Follow };
 
