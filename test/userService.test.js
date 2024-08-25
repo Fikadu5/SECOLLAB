@@ -37,7 +37,7 @@ jest.mock('../models/user');
       });
 
         
-     // Retrieve all users except the one with the given ID
+          // Retrieve all users except the one with the given ID
     it('should retrieve all users except the one with the given ID', async () => {
         const mockUser = { _id: '123', name: 'John Doe' };
         const mockUsers = [
@@ -92,12 +92,12 @@ jest.mock('../models/user');
         expect(result.totalPages).toBe(1);
         expect(result.totalResults).toBe(mockCount);
       });
-  // Handles cases where the user ID has no followers
+          // Handles cases where the user ID has no followers
     it('should return empty results when user ID has no followers', async () => {
         const mockId = 'user123';
         const mockFollowers = [];
         const mockCount = 0;
-
+  
         jest.spyOn(Follow, 'find').mockReturnValue({
           populate: jest.fn().mockReturnThis(),
           skip: jest.fn().mockReturnThis(),
@@ -105,9 +105,9 @@ jest.mock('../models/user');
           exec: jest.fn().mockResolvedValue(mockFollowers)
         });
         jest.spyOn(Follow, 'countDocuments').mockResolvedValue(mockCount);
-
+  
         const result = await getmyFollowers(mockId);
-
+  
         expect(result.results).toEqual(mockFollowers);
         expect(result.currentPage).toBe(1);
         expect(result.totalPages).toBe(0);
@@ -120,7 +120,7 @@ jest.mock('../models/user');
         const mockLimit = 10;
         const mockTotalFollowingCount = 15;
         const mockTotalFollowing = [{ following: 'user1' }, { following: 'user2' }];
-
+    
         jest.spyOn(Follow, 'countDocuments').mockReturnValue({
           exec: jest.fn().mockResolvedValue(mockTotalFollowingCount),
         });
@@ -130,9 +130,9 @@ jest.mock('../models/user');
           limit: jest.fn().mockReturnThis(),
           exec: jest.fn().mockResolvedValue(mockTotalFollowing),
         });
-
+  
         const result = await getMyFollowing(mockId, mockPage, mockLimit);
-
+  
         expect(result).toEqual({
           results: mockTotalFollowing,
           currentPage: mockPage,
@@ -148,7 +148,7 @@ jest.mock('../models/user');
         const mockLimit = 10;
         const mockTotalFollowingCount = 0;
         const mockTotalFollowing = [];
-
+    
         jest.spyOn(Follow, 'countDocuments').mockReturnValue({
           exec: jest.fn().mockResolvedValue(mockTotalFollowingCount),
         });
@@ -158,9 +158,9 @@ jest.mock('../models/user');
           limit: jest.fn().mockReturnThis(),
           exec: jest.fn().mockResolvedValue(mockTotalFollowing),
         });
-
+  
         const result = await getMyFollowing(mockId, mockPage, mockLimit);
-
+  
         expect(result).toEqual({
           results: mockTotalFollowing,
           currentPage: mockPage,
@@ -169,6 +169,9 @@ jest.mock('../models/user');
           limit: mockLimit,
         });
       });
+     
+         
+
 
           // Successfully follows a user when no existing follow record is found
     it('should create a new follow record when no existing follow record is found', async () => {

@@ -1,7 +1,7 @@
 const projectservice = require("../services/projectservice");
 const flash = require('connect-flash');
 const userService = require('../services/userservice');
-
+const xss = require('xss');
 
 
 
@@ -11,8 +11,8 @@ const userService = require('../services/userservice');
 
 exports.acceptinterest = async (req, res) => {
   console.log("accepted request");
-  const userId = req.params.userid;
-  const projectid = req.params.projectid;
+  const userId = xss(req.params.userid);
+  const projectid = xss(req.params.projectid);
   const result = await projectservice.acceptinterest(projectid, userId);
   if (result) {
     res.status(200).json({ message: 'added to the team' });
@@ -201,7 +201,7 @@ exports.getFollowingProjects = async(req,res) =>
 exports.deleteproject = async(req,res) =>
 {
   try{
-    const id = req.params.id
+    const id = xss(req.params.id);
     const del = await projectservice.deleteproject(id);
     if(del)
     {
@@ -226,7 +226,7 @@ exports.deleteproject = async(req,res) =>
 
 exports.registerInterestwithid = async(req,res) =>
 {
-    const projectId=req.params.id;
+    const projectId= xss(req.params.id);
     const userid = req.user._id;
     const project = await projectservice.registerInterest(projectId, userid);
     if(project)
@@ -246,7 +246,7 @@ exports.registerInterestwithid = async(req,res) =>
 exports.getcatprojects = async(req,res) =>
 {
   try{
-  const name = req.params.name;
+  const name = xss(req.params.name);
   const projects= await projectservice.get_catblogs(name);
   const currentuser =  await userService.getUserById(req.user._id);
  
@@ -263,5 +263,4 @@ exports.getcatprojects = async(req,res) =>
   }
   
 }
-
 

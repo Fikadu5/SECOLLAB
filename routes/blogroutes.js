@@ -15,9 +15,8 @@ const router = express.Router();
 // Blog Routes
 router.get('/followingblogs',ensureAuthenticated,getFollowingBlogs)
 router.get('/',ensureAuthenticated, getBlogs);
-router.get("/searchblog/:query",ensureAuthenticated,getsearchresult)
-router.get('/rand', ensureAuthenticated,  getRandomBlogs
-);
+router.get("/searchblog/:query",ensureAuthenticated,getsearchresult);
+router.get('/rand', ensureAuthenticated,  getRandomBlogs);
 // router.post("/addorremovelike/:id",authenticateToken ,addorremovelike);
 router.get("/myblogs",ensureAuthenticated,getMyBlogs);
 router.get('/new', ensureAuthenticated, (req, res, next) => {

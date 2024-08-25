@@ -24,4 +24,3 @@ exports.handleSignup = async (req, res) => {
       res.status(400).render('signup', { error: error.message });
   }
 };
-

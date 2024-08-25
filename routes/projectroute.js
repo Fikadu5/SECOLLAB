@@ -36,4 +36,3 @@ router.get('/searchproject', ensureAuthenticated,searchProjects);
 router.get("/:name",ensureAuthenticated,getcatprojects);
 
 module.exports = router;
-

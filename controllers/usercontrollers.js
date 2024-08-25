@@ -9,11 +9,12 @@ const flash = require('connect-flash');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const xss = require('xss');
 
 
 exports.getsearchresult = async(req,res) =>
   {
-    const query = req.params.text;
+    const query = xss(req.params.text);
     const users = userService.getsearchresult(query)
     const currentuser = await  userService.getUserById(req.user._id);
     if(users)
@@ -106,7 +107,7 @@ exports.removefollower = async(req,res) =>
 {
   try{
     console.log("in the controller of remove function")
-  const follower_id = req.params.id;
+  const follower_id = xss(req.params.id);
   const userid = req.user._id;
   const remove = userService.removefollower(userid,follower_id);
   if(remove){
@@ -134,7 +135,7 @@ exports.getFollowing = async(req,res)=>
   try{
     const page = req.query.page ? parseInt(req.query.page) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit) : 10;
-    const id = req.params.id;
+    const id = xss(req.params.id);
     const currentuser =  userService.getUserById(req.user._id);
      const following = await userService.getFollowing(id,page,limit);
      
@@ -150,7 +151,7 @@ exports.getFollowing = async(req,res)=>
 exports.getFollowers = async(req,res) =>
 {
   try{
-    const id = req.params.id;
+    const id = xss(req.params.id);
     const page = req.query.page ? parseInt(req.query.page) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit) : 10;
     const  paginatedFollowers = await userService.getFollowers(id,page,limit);
@@ -181,7 +182,7 @@ exports.renderabout = async(req,res)=>
 }
 
 exports.contactUser = async (req, res) => {
-  const { name, email, phone, message } = req.body;
+  const { name, email, phone, message } = xss(req.body);
   try {
     await userService.saveUserComment(email, message);
     res.redirect('/');
@@ -227,7 +228,7 @@ exports.editProfile = async (req, res) => {
     try {
       const user = await userService.getUserById(req.user._id);
       
-      const currentuser =  userService.getUserById(req.user._id);
+      const currentuser = await userService.getUserById(req.user._id);
       res.render("editprofile", { user,currentuser,messages: {
         success: req.flash('success'),
         error: req.flash('error')
@@ -352,40 +353,45 @@ exports.getOtherUserProfile = async (req, res) => {
   }
 };
 
+exports.SendCodeEmail = async (req, res) => {
+  try {
+    const new_password = Math.floor(100000 + Math.random() * 900000).toString();
+    const salt = await bcrypt.genSalt(10);
+    const hashedpassword = await bcrypt.hash(new_password, salt);
 
-exports.SendCodeEmail = async(req,res)=>
-{
-  const new_password = Math.floor(100000 + Math.random() * 900000).toString();;
-  
-  const salt = await bcrypt.genSalt(10);
-  const hashedpassword = await bcrypt.hash(new_password, salt);
-  User.updateOne({_id:req.user._id},{$set:{
-    password:hashedpassword,
-    salt:salt
-  }})
-  const transporter = nodemailer.createTransport({
-    service: 'gmail', // or any other email service provider
-    auth: {
-      user: "zelalem328@gmail.com", // replace with your email address
-      pass: "Scooponset1" // replace with your email password
-    }
-  });
-  const mailOptions = {
-    from: "zelalem328@gmail.com", // sender address
-    to: "zgetnet24@gmail.com", // receiver address
-    subject: 'Regarding your new password', // email subject
-    text: `tour new password is ${new_password }` // email body
-  };
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.log(error);
-    } else {
-      console.log('Email sent: ' + info.response);
-    }
-  
-});
-}
+    await User.updateOne(
+      { _id: req.user._id },
+      { $set: { password: hashedpassword, salt: salt } }
+    );
 
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: "recipient_email@gmail.com",
+      subject: 'Regarding your new password',
+      text: `Your new password is ${new_password}`
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Error sending email:', error);
+      } else {
+        console.log('Email sent: ' + info.response);
+      }
+    });
+
+  } catch (error) {
+    console.error('Error in SendCodeEmail:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
 
 // Controller function for following a user
 exports.followUser = async (req, res) => {
@@ -415,7 +421,7 @@ exports.unfollow = async(req,res) =>
   try {
     console.log("in the controller of the unfollow user");
 
-    const following_id = req.params.id;
+    const following_id = xss(req.params.id);
     const follower_id = req.user._id;
 
     console.log(`Received unfollow request from ${follower_id} to unfollow ${following_id}`);
@@ -441,7 +447,7 @@ exports.unFollowUser = async (req, res) => {
   try {
     console.log("in the controller of the unfollow user");
 
-    const following_id = req.params.id;
+    const following_id = xss(req.params.id);
     const follower_id = req.user._id;
 
     console.log(`Received unfollow request from ${follower_id} to unfollow ${following_id}`);
@@ -467,7 +473,7 @@ exports.checkfollow = async (req, res) => {
   try {
     console.log("in the user controller for check following")
     const follower = req.user._id;
-    const following = req.params.id;
+    const following = xss(req.params.id);
     console.log("In the followers controller");
     const isFollowing = await userService.checkfollowing(follower, following);
     if (isFollowing) {
@@ -482,7 +488,7 @@ exports.checkfollow = async (req, res) => {
 }
 
 exports.follow = async (req, res) => {
-  const following = req.params.id;
+  const following = xss(req.params.id);
   const follower = req.user._id;
   if(follower == following)
   {

@@ -1,4 +1,4 @@
- const {getFollowingBlogs,
+    const {getFollowingBlogs,
       checklike,getsearchresult,updateBlog,
       getcatblogs, getcatagories,getRandomBlogs} =require("../controllers/blogcontroller")
     const blogService = require("../services/blogservice");
@@ -82,7 +82,7 @@
             currentuser: { name: 'Test User' }
           });
         });
- // Handles unauthorized user trying to update a blog
+        // Handles unauthorized user trying to update a blog
         it('should return 403 when the user is unauthorized', async () => {
           const req = {
             params: { id: '123' },
@@ -94,11 +94,11 @@
             status: jest.fn().mockReturnThis(),
             send: jest.fn()
           };
-
+        
           jest.spyOn(blogService, 'getBlogById').mockResolvedValue({ user_id: { equals: jest.fn().mockReturnValue(false) } });
-
+    
           await updateBlog(req, res);
-
+    
           expect(blogService.getBlogById).toHaveBeenCalledWith('123');
           expect(res.status).toHaveBeenCalledWith(403);
           expect(res.send).toHaveBeenCalledWith('Unauthorized');
@@ -115,7 +115,7 @@
         status: jest.fn().mockReturnThis(),
         send: jest.fn()
       };
-
+   
       jest.spyOn(blogService, 'getBlogById').mockResolvedValue({ user_id: { equals: jest.fn().mockReturnValue(true) } });
       jest.spyOn(blogService, 'updateBlogById').mockResolvedValue();
 
@@ -126,6 +126,7 @@
       expect(res.redirect).toHaveBeenCalledWith('/myblogs');
     });
 
+    
     // Handles case when there are no blogs available
     it('should render the view with empty blogs and pagination when no blogs are available', async () => {
       const req = {
@@ -220,7 +221,7 @@
       expect(res.render).toHaveBeenCalledWith('Blogcatagories', { tags, currentuser });
     });
     // Successfully retrieves tags from blogService
-  it('should retrieve tags and render Blogcatagories with tags and currentuser when blogService.gettags() is successful', async () => {
+    it('should retrieve tags and render Blogcatagories with tags and currentuser when blogService.gettags() is successful', async () => {
       const req = { user: { _id: '123' } };
       const res = { render: jest.fn() };
       const tags = ['tag1', 'tag2'];
@@ -360,4 +361,3 @@
           expect(res.status).toHaveBeenCalledWith(201);
           expect(res.json).toHaveBeenCalledWith({ "message": "not liked" });
         });
-

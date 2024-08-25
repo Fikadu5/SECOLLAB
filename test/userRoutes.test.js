@@ -155,4 +155,3 @@ describe('User Routes', () => {
     expect(res.text).toBe('Code Sent');
   });
 });
-

@@ -105,4 +105,3 @@ describe('Project Routes', () => {
     expect(res.text).toBe('My Collaborations');
   });
 });
-

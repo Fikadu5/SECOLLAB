@@ -1,4 +1,5 @@
- const { getMyBlogs,getFollowingBlogs,
+    
+    const { getMyBlogs,getFollowingBlogs,
       checklike,gettags,getcatblogs ,getBlogById,
     getUserBlogs,updateBlogById,getsearchresult} = require('../services/blogservice');
     const Blog = require('../models/blog');
@@ -59,6 +60,7 @@
           expect(Blog.find).toHaveBeenCalledWith({ $title: { $search: query } });
         });
 
+        
       // Returns without error when the blog is updated successfully
         it('should throw an error when an invalid blogId is provided', async () => {
           const blogId = 'invalidBlogId';
@@ -203,4 +205,5 @@
 
 
 
-               
+               // Fetch blogs for a user following a single user
+   

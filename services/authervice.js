@@ -31,4 +31,3 @@ exports.createAndRegister = async (details) => {
         throw error;
     }
 };
-

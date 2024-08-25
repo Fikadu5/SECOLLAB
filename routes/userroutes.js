@@ -54,4 +54,3 @@ router.post("/deleteprofile",ensureAuthenticated,delete_photo)
 
 
 module.exports = router;
-

@@ -123,4 +123,3 @@ describe('Blog Routes', () => {
     expect(res.text).toBe('Category Added');
   });
 });
-

@@ -172,22 +172,23 @@ router.post('/change-password', async (req, res) => {
   try {
       // Ensure new passwords match
       if (newPassword !== confirmNewPassword) {
-          return res.render('change-password', { messages: { error: 'New passwords do not match' } });
+        req.flash('error','passwords do not match')
+        res.redirect('/authenticate/change-password');
       }
 
       // Find the user from the session or database
       const user = await User.findById(req.user._id); // Ensure req.user is populated with the logged-in user
 
       if (!user) {
-          return res.render('change-password', { messages: { error: 'User not found' } });
+        res.redirect('/authenticate/change-password');
       }
 
       // Check if the current password is correct
       const isMatch = await bcrypt.compare(currentPassword, user.hash); // Use user.hash to compare
 
       if (!isMatch) {
-        req.flash('Current password is incorrect')
-          return res.render('changepassword', { messages: { error: 'Current password is incorrect' } });
+        req.flash('error','Current password is incorrect')
+        res.redirect('/authenticate/change-password');
       }
 
       // Hash the new password
@@ -197,11 +198,11 @@ router.post('/change-password', async (req, res) => {
       // Update the user's password
       user.hash = hashedPassword; // Update with the new hashed password
       await user.save();
-        req.flash('succes','Password changed successfully')
-      res.render('changepassword', { messages: { success: 'Password changed successfully' } });
+        req.flash('success','Password changed successfully')
+      res.redirect('/authenticate/change-password');
   } catch (err) {
       console.error(err);
-      res.render('changepassword', { messages: { error: 'An error occurred. Please try again later.' } });
+      res.redirect('/authenticate/change-password');
   }
 });
 

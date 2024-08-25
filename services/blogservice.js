@@ -6,20 +6,7 @@ const BlogTag = require("../models/Blogtag")
 
 
 
-exports.getsearchresult = async (query) => {
-  try {
-     if (!query || query.trim() === '') {
-      return []; // Return an empty array if the query is empty
-    }
-    const blogs = await Blog.find({
-      $text: { $search: query }
-    }).lean(); 
-    return blogs;
-  } catch (err) {
-    console.error('Error searching projects:', err);
-    throw err;
-  }
-};
+
 
 
 exports.getCurrentUser = async(id)=>
@@ -31,10 +18,11 @@ exports.getCurrentUser = async(id)=>
 exports.getMyBlogs = async (id, page, limit) => {
   try {
     return await Blog.find({ owner: id })
-      .populate("owner")
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .exec();
+    .populate("owner")
+    .sort({ created_at: -1 })
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .exec();
   } catch (error) {
     throw new Error('Error fetching blogs');
   }
@@ -42,6 +30,7 @@ exports.getMyBlogs = async (id, page, limit) => {
 exports.getBlogs = async(id) =>
 {
    const blogs = await Blog.find({owner:{$ne:id}})
+   .sort({ created_at: -1 })
    .populate("tags")
    .populate("owner");
 
@@ -70,7 +59,7 @@ exports.getRandomBlogs = async (userId, page, limit) => {
     // Step 1: Aggregate to get raw blog IDs
     const blogIds = await Blog.aggregate([
       { $match: { owner: { $ne: userId } } },
-      { $sort: { createdAt: -1 } },
+      { $sort: { created_at: -1 } },
       { $skip: (page - 1) * limit },
       { $limit: limit },
       { $project: { _id: 1 } } // Only get the IDs of the blogs
@@ -172,7 +161,8 @@ exports.getUserBlogs = async (userId,page,limit) => {
       { $match: { user_id: userId} }, // Exclude blogs by the current user
       { $sample: { size: 1000 } }, // Get a large random sample to paginate from
       { $skip: (page - 1) * limit }, // Skip the first (page - 1) * limit blogs
-      { $limit: limit } // Limit to the specified number of blogs
+      { $limit: limit } ,
+      { $sort: { created_at: -1 } },
     ]);
     return blogs
      
@@ -206,6 +196,21 @@ exports.getFollowingBlogs = async (userId) => {
   }
 };
 
+
+
+
+exports.getsearchresult = async (query) => {
+  try {
+    console.log("in the search result service")
+     
+    const blogs = await Blog.find({title:query})
+    
+    return blogs;
+  } catch (err) {
+    console.error('Error searching projects:', err);
+   
+  }
+};
 
 exports.addorremovelike = async (blogid,userid) => {
   console.log("in the service")
@@ -272,12 +277,12 @@ exports.gettags = async() =>
 
 }
 
-exports.newtag = async(name,slug) =>
+exports.newtag = async(name,description) =>
 {
   try{
   const Blogtag = new BlogTag({
     name,
-    slug
+    description
   })
   Blogtag.save()
   return Blogtag
@@ -291,7 +296,7 @@ catch(err)
 }
 
 
-exports.getcatblogs = async(name) =>
+exports.getcatblogs = async(name, id) =>
 {
   const blogtag = await BlogTag.findOne({ name: name });
 if (!blogtag) {
@@ -300,7 +305,7 @@ if (!blogtag) {
 }
 console.log(blogtag._id); // Should log a valid ObjectId
 
-const blogs = await Blog.find({ tags: { $in: [blogtag._id] } }).sort({ created_at: 1 }).populate("tags");
+const blogs = await Blog.find({ tags: { $in: [blogtag._id] }, owner:{$ne: id} }).sort({ created_at: 1 }).populate("tags");
 console.log(blogs); // Check if any blogs are returned
 
 

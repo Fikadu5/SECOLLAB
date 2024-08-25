@@ -9,6 +9,9 @@ const projectSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  looking_for:{
+    type:String,
+  },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

@@ -18,4 +18,3 @@ const Usercomment = mongoose.model("Usercomment",userCommentSchema);
 
 // Exporting schemas as an object
 module.exports = Usercomment;
-

@@ -8,7 +8,7 @@ const {User,Follow} = require('../models/user');
 exports.getfollowingprojects = async(userId) =>
 {
    // 1. Find all users that the given user is following
-   const followings = await Follow.find({ follower: userId }).populate('following').exec();
+   const followings = await Follow.find({ follower: userId }).populate('following').sort({ createdAt: -1 }).exec();
     
    // Extract the following users' IDs
    const followingUserIds = followings.map(follow => follow.following._id);
@@ -26,7 +26,7 @@ exports.getProjects = async (id) => {
   try{
     console.log("fetching from database");
     const results = await Project.find({owner:{$ne:id}})
-    .populate('owner').populate('tags');
+    .populate('owner').populate('tags').sort({ createdAt: -1 });
     return results;
   }
   catch(e)
@@ -112,7 +112,7 @@ exports.searchProjects = async(query) => {
 exports.getMyProject = async (id) => {
   try {
    
-    const projects = await Project.find({ owner: id});
+    const projects = await Project.find({ owner: id}).sort({ createdAt: -1 });
 
     // If projects are found, send them back to the client
     if (projects) {
@@ -136,7 +136,8 @@ exports.getProjectById = async (projectId) => {
     .populate("owner")
     .populate("tags")
     .populate("requests")
-    .populate("collaborators");
+    .populate("collaborators")
+    .sort({ createdAt: -1 })
   } catch (error) {
     throw new Error('Error fetching project');
   }
@@ -149,7 +150,7 @@ exports.getUserProjects = async (userId) => {
     {
       throw new Error('Error fetching user projects')
     }
-    return await Project.find({ user_id: userId });
+    return await Project.find({ user_id: userId }).sort({ createdAt: -1 });
   } catch (error) {
     throw new Error('Error fetching user projects');
   }
@@ -202,6 +203,7 @@ exports.getMyProjectbyid = async(id) =>
   const project = await Project.findById(id)
   .populate("collaborators")
   .populate("requests")
+  .sort({ createdAt: -1 })
   return project
 
 }
@@ -210,7 +212,7 @@ exports.getcollabration = async(id) =>
 {
   try{
   let project =[]
-  const projects = await Project.find();
+  const projects = await Project.find().sort({ createdAt: -1 });
     projects.forEach(async(p) =>
     {
       if( p.collaborators.includes(id))

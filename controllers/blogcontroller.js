@@ -4,6 +4,7 @@ const blogService = require('../services/blogservice');
 
 const multer = require('multer');
 const path = require('path');
+const xss = require('xss');
 
 const flash = require('connect-flash');
 const userService = require('../services/userservice');
@@ -15,16 +16,18 @@ const userService = require('../services/userservice');
 exports.getsearchresult = async(req,res) =>
 {
   try{
-  const query = req.params.query;
+    console.log("in the search result controller")
+  const query = xss(req.params.query);
   const blogs = await blogService.getsearchresult(query);
-  const currentuser =  await userService.getUserById(req.user._id);
+  console.log('Blogs data:', blogs); // Log the blogs data to inspect it
+
   if(blogs)
   {
-    res.render("searchblogs",{ blogs ,
+    res.render("allblog",{ blogs ,
        messages: {
         success: req.flash('success'),
         error: req.flash('error')
-      }, currentuser})
+      }})
 
   }
   else{
@@ -40,7 +43,7 @@ catch(err)
 exports.getFollowingBlogs = async(req,res) =>
 {
   const blogs = await blogService.getFollowingBlogs(req.user._id);
-  const currentuser =  userService.getUserById(req.user._id);
+  const currentuser = await userService.getUserById(req.user._id);
   res.render("allblog",{blogs,messages: {
         success: req.flash('success'),
         error: req.flash('error')
@@ -67,10 +70,10 @@ exports.getBlogs = async (req, res) => {
 };
 exports.deleteBlog = async(req,res) => {
     try{
-      const id = req.params.id;
+      const id = xss(req.params.id);
       const userid = req.user._id;
       const deleteblog = await blogService.deleteBlog(id,userid);
-      const currentuser =  userService.getUserById(req.user._id);
+      const currentuser = await userService.getUserById(req.user._id);
       if(deleteblog)
       {
         req.flash('success', 'Successfully deleted the blog');
@@ -95,7 +98,7 @@ exports.getMyBlogs = async (req, res) => {
     const page = req.query.page ? parseInt(req.query.page) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit) : 10; // Default limit to 10 if not provided
     const totalBlogsCount = await Blog.countDocuments({ owner: req.user._id }).exec();
-    const currentuser =  userService.getUserById(req.user._id);
+    const currentuser =  await userService.getUserById(req.user._id);
     
     const blogs = await blogService.getMyBlogs(req.user._id, page, limit);
     
@@ -121,7 +124,7 @@ exports.getTopBlogs = async (req, res) => {
     const limit = req.query.limit ? parseInt(req.query.limit) : 5; // Default limit to 5 if not provided
     const totalBlogsCount = await Blog.countDocuments().exec();
     const blogs = await blogService.getTopBlogs(page, limit,req.user._id)
-    const currentuser =  userService.getUserById(req.user._id);
+    const currentuser = await userService.getUserById(req.user._id);
 
     const pagination = {
       currentPage: page,
@@ -143,7 +146,7 @@ exports.getTopBlogs = async (req, res) => {
 exports.checklike = async(req,res) =>
 {
   const userid = req.user._id;
-  const id = req.params.id;
+  const id = xss(req.params.id);
   const blog = await blogService.checklike(id,userid);
   if(blog == 200)
   {
@@ -160,7 +163,7 @@ exports.addorremovelike = async(req,res) =>
   try{
     console.log("in the controller of the like")
 
-    const blogid = req.params.id;
+    const blogid = xss(req.params.id);
     const userid = req.user._id;
    
   const liked = await blogService.addorremovelike(blogid,userid);
@@ -192,7 +195,7 @@ catch(err)
 exports.newRoute = async (req, res) => {
   console.log("In newRoute controller");
   const tags = await blogService.gettags();
-  const currentuser =  userService.getUserById(req.user._id);
+  const currentuser =  await userService.getUserById(req.user._id);
   res.render('newblog',{tags,
     messages: {
         success: req.flash('success'),
@@ -204,7 +207,7 @@ exports.getBlogById = async (req, res) => {
   try {
     console.log("In getBlogById controller");
 
-    const id = req.params.id;
+    const id = xss(req.params.id);
     if (!id) {
       return res.status(400).send('Blog ID is required');
     }
@@ -287,7 +290,7 @@ exports.createBlog = async (req, res) => {
           checkedOptions,
           imageFilename
         );
-
+        req.flash('success',"blog created successfully")
         // Redirect after successful creation
         res.redirect('/blogs/myblogs');
       } catch (error) {
@@ -303,10 +306,10 @@ exports.createBlog = async (req, res) => {
 exports.editBlog = async (req, res) => {
   console.log("In editBlog controller");
     
-    const id = req.params.id;
+    const id = xss(req.params.id);
     try {
       const blog = await blogService.getBlogById(id);
-      const currentuser =  userService.getUserById(req.user._id);
+      const currentuser =  await userService.getUserById(req.user._id);
       if (blog.owner.equals(req.user._id)) {
         res.render('editblog', { blog,
           messages: {
@@ -382,7 +385,7 @@ exports.getotherUsersblogs = async(req,res) =>
 }
 exports.getUserBlogs = async (req, res) => {
   console.log("In getUserBlogs controller");
-  const currentuser =  userService.getUserById(req.user._id);
+  const currentuser = await userService.getUserById(req.user._id);
 
     try {
       const blogs = await blogService.getUserBlogs(req.user._id);
@@ -433,7 +436,7 @@ exports.getRandomBlogs = async (req, res) => {
 exports.getcatagories = async(req,res) =>
 {
   const tags = await blogService.gettags();
-  const currentuser =  userService.getUserById(req.user._id);
+  const currentuser = await userService.getUserById(req.user._id);
   res.render("Blogcatagories",{ tags,currentuser,messages: {
         success: req.flash('success'),
         error: req.flash('error')
@@ -449,9 +452,9 @@ exports.getc= async(req,res) =>
 exports.newtag = async(req,res) =>
 {
   try{
-  console.log("in the new catagories")
+  console.log("in the new catagories");
 
-  const name = blogService.newtag(req.body.name,req.body.slug);
+  const name = blogService.newtag(req.body.name,req.body.description);
   res.redirect("/blogs/catagories")
   }
   catch(err)
@@ -464,8 +467,8 @@ exports.newtag = async(req,res) =>
 
 exports.getcatblogs = async(req,res) =>
 {
-  const blogs = await blogService.getcatblogs(req.params.name);
-  const currentuser =  userService.getUserById(req.user._id);
+  const blogs = await blogService.getcatblogs(req.params.name, req.user._id);
+  const currentuser = await userService.getUserById(req.user._id);
   res.render("allblog",{
     blogs,
     messages: {
@@ -474,4 +477,3 @@ exports.getcatblogs = async(req,res) =>
       },currentuser
 })
   }
-

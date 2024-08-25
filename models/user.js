@@ -44,4 +44,3 @@ const Follow = mongoose.model('Follower', followerSchema);
 
 
 module.exports = { User, Follow };
-
