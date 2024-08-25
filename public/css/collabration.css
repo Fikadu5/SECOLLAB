@@ -160,3 +160,34 @@ body.dark-mode .btn-outline-success {
   border: 1px solid #444444;
 }
 
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+/* Ensure the container for tags can accommodate multiple tags */
+.blog-ta {
+  display: flex; /* Use flexbox to align tags side-by-side */
+  flex-wrap: wrap; /* Allow wrapping to the next line if necessary */
+  gap: 0.5rem; /* Adjust spacing between tags */
+  margin-top: 10px; /* Space above the tags */
+}
+
+/* Style individual tags */
+.tag {
+  display: inline-block; /* Ensure tags are inline */
+  background-color: #9b59b6; /* Background color for the tag */
+  color: white; /* Text color */
+  padding: 0.5rem 1rem; /* Padding inside the tag */
+  border-radius: 20px; /* Rounded corners */
+  font-size: 0.8rem; /* Font size */
+  text-decoration: none; /* Remove underline from links */
+  margin-right: 0.5rem; /* Space between tags */
+  margin-bottom: 0.5rem; /* Space below tags */
+  transition: background-color 0.3s ease; /* Smooth background color transition */
+}
+
+.tag:hover {
+  background-color: #8e44ad; /* Change background color on hover */
+}

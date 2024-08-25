@@ -332,4 +332,126 @@ display: inline-block;}
         a{
         text-decoration: none;
         }
-
+        a{
+            text-decoration: none !important;
+        }
+        h2{
+            color:black;
+        }
+        p{
+            color:black;
+        }
+        body.dark-mode p{
+            color:white;
+        }
+        /* Additional styling for section titles */
+        .section-title {
+            font-size: 2.7rem; /* Slightly larger for main section titles */
+            font-weight: 700; /* Bold weight for prominence */
+            color: #1abc9c; /* Bright, eye-catching color */
+            text-align: center; /* Center align text */
+            text-transform: uppercase; /* Uppercase for a strong presence */
+            letter-spacing: 2px; /* Increased letter spacing for impact */
+            margin-bottom: 2rem; /* More space below for separation */
+            position: relative; /* For positioning pseudo-elements */
+        }
+    
+        .section-title::after {
+            content: ''; /* Empty content for pseudo-element */
+            position: absolute; /* Absolute positioning */
+            left: 50%; /* Center horizontally */
+            bottom: -10px; /* Position below text */
+            transform: translateX(-50%); /* Center the line */
+            width: 50%; /* Width of the line */
+            height: 3px; /* Thickness of the line */
+        
+            border-radius: 5px; /* Rounded corners */
+        }
+      
+        .blog-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .blog-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        
+        .blog-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .blog-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .blog-meta {
+            font-size: 0.9rem;
+            color: #777;
+        }
+        
+       
+        
+        .blog-excerpt {
+            margin-top: 12px;
+            color: #333;
+        }
+        
+        .read-more {
+            margin-top: 20px;
+            text-align: right;
+        }
+        
+        .btn-read-more {
+            background: linear-gradient(45deg, #8e9eab, #eef2f3); /* Soft gradient with subtle colors */
+            color: #333; /* Darker text for contrast */
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            text-decoration: none;
+          
+            box-shadow: 0 4px 8px rgba(142, 158, 171, 0.2); /* Softer shadow */
+            transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+        }
+        
+        .btn-read-more:hover {
+            background: linear-gradient(45deg, #b1beca, #f0f5f6); /* Slightly lighter gradient on hover */
+            box-shadow: 0 6px 12px rgba(142, 158, 171, 0.4); /* Slightly more prominent shadow */
+            transform: translateY(-3px);
+        }
+        
+        .btn-read-more:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 8px rgba(142, 158, 171, 0.2);
+        }
+        
+        
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+          }
+          
+          /* Tag Styles */
+          .tag {
+            display: inline-block;
+            background-color: #9b59b6;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            text-decoration: none;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: background-color 0.3s ease;
+          }
+          
+          .tag:hover {
+            background-color: #8e44ad;
+            color:white;
+          }
