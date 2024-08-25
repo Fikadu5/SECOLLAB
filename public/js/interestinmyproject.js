@@ -17,7 +17,7 @@ accepts.forEach((accept) => {
       if (response.ok) {
         accept.textContent = "added to the group";
       } else {
-        alert(response.status);
+        
       }
       return response.json();
     })

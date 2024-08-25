@@ -35,4 +35,3 @@ var button = document.getElementById("follow");
       });
   });
 
-

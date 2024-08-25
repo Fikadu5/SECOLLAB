@@ -14,7 +14,7 @@ event.preventDefault();
 }
 else{
 
- window.location.href = "http://127.0.0.1:5000/searchproject/" + text;
+ window.location.href = "http://localhost:3000/projects/searchresult/" + text;
 
 }
 

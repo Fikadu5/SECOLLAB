@@ -31,6 +31,11 @@ followButtons.forEach(button => {
 
 
 
+
+
+
+
+
   followButtons.forEach(button => {
     button.addEventListener("click", () => {
       if(button.textContent == "Follow") {
