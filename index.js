@@ -23,7 +23,7 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 
 // Connect to MongoDB
-mongoose.connect("mongodb://localhost:27017/zelalem", { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect("mongodb://localhost:27017/SECOLLAB", { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('MongoDB connected'))
   .then(async () => {
     await Project.collection.createIndex({ title: 'text' });
