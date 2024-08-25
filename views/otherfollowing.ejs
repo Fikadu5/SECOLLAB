@@ -13,23 +13,7 @@
   <%- include("navigationloggedin") %>
   <%- include("sidebar") %>
   
-  <% if (messages && messages.success && messages.success.length > 0) { %>
-    <div class="alert alert-success">
-        <%= messages.success %>
-    </div>
-  <% } %>
 
-  <% if (messages && messages.error && messages.error.length > 0) { %>
-    <div class="alert alert-danger">
-        <%= messages.error %>
-    </div>
-  <% } %>
-
-  <% if (messages && messages.length > 0) { %>
-    <div class="alert alert-info">
-        <%= messages %>
-    </div>
-  <% } %>
 
   <div class="container">
     <h1>Users I'm Following</h1>
@@ -45,15 +29,13 @@
                 <%= f.following.fname %> <%= f.following.lname %>
               </a>
             </div>
-            <form action="/unfollow/<%= f.following._id %>" method="post">
-              <button type="submit" class="unfollow-btn">Unfollow</button>
-            </form>
+            
           </div>
           <hr>
         <% }); %>
       <% } else { %>
         <h3 class="no-followers-text">You don't follow anyone yet</h3>
-        <a href="/users" class="btn btn-info" style="margin-left:30%;">Click here to see other users</a>
+        <a href="" class="btn btn-info">Click here to see other users</a>
       <% } %>
     </div>
 

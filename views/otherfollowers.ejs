@@ -12,24 +12,7 @@
 <body>
     <%- include("navigationloggedin") %>
     <%- include("sidebar") %>
-    <% if (messages && messages.success && messages.success.length > 0) { %>
-        <div class="alert alert-success">
-            <%= messages.success %>
-        </div>
-    <% } %>
     
-    <% if (messages && messages.error && messages.error.length > 0) { %>
-        <div class="alert alert-danger">
-            <%= messages.error %>
-        </div>
-    <% } %>
-    
-    <% if (messages && messages.length > 0) { %>
-        <div class="alert alert-info">
-            <%= messages %>
-        </div>
-    <% } %>
-
     <div class="container">
         <h1>Your Followers</h1>
         <div class="following">
@@ -44,9 +27,7 @@
                                 <a href="/otherprofile/<%= f.following._id %>">
                                 <p class="follower-name"><%= f.follower.fname %> <%= f.follower.lname %></p></a>
                             </div>
-                            <form method="post" action="/removefollower/<%= f.follower._id %>">
-                                <button type="submit" follower_id="<%= f.id %>" class="button allremove">Remove</button>
-                            </form>
+                            
                         </div>
                         <hr>
                     <% } else { %>
