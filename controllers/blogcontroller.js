@@ -1,11 +1,10 @@
-const blog = require('../models/blog');
+const Blog = require('../models/blog');
 const User = require("../models/user");
 const blogService = require('../services/blogservice');
 
 const multer = require('multer');
 const path = require('path');
-const Blog = require('../models/blog');
-const BlogTag = require('../models/Blogtag');
+
 const flash = require('connect-flash');
 const userService = require('../services/userservice');
 
@@ -16,12 +15,12 @@ const userService = require('../services/userservice');
 exports.getsearchresult = async(req,res) =>
 {
   try{
-  const query = req.params.text;
-  const blogs = blogService.getsearchresult(query);
-  const currentuser =  userService.getUserById(req.user._id);
+  const query = req.params.query;
+  const blogs = await blogService.getsearchresult(query);
+  const currentuser =  await userService.getUserById(req.user._id);
   if(blogs)
   {
-    res.render("searchblogs",{blogs,
+    res.render("searchblogs",{ blogs ,
        messages: {
         success: req.flash('success'),
         error: req.flash('error')
@@ -74,6 +73,7 @@ exports.deleteBlog = async(req,res) => {
       const currentuser =  userService.getUserById(req.user._id);
       if(deleteblog)
       {
+        req.flash('success', 'Successfully deleted the blog');
         console.log("successfully deleted the blog");
         res.redirect("/blogs/myblogs")
       }
@@ -134,30 +134,47 @@ exports.getTopBlogs = async (req, res) => {
       success: req.flash('success'),
       error: req.flash('error')
     }  });
-  } catch (err) {
-    console.log("Error rendering top blogs,", err);
+  } catch (error) {
+    console.log("Error rendering top blogs,", error);
     res.status(500).send("Error occurred while rendering the blogs view");
   }
 };
 
+exports.checklike = async(req,res) =>
+{
+  const userid = req.user._id;
+  const id = req.params.id;
+  const blog = await blogService.checklike(id,userid);
+  if(blog == 200)
+  {
+    res.status(200).json({"message":"already liked"})
+  }
+  else if (blog == 201)
+  {
+    res.status(201).json({"message":"not liked"})
+  }
+}
 
-
-exports.addorremovelike = (req,res) =>
+exports.addorremovelike = async(req,res) =>
 {
   try{
     console.log("in the controller of the like")
 
-  const blogid = req.params.id;
-  const userid = req.user._id;
-  const liked = blogService.addorremovelike(blogid,userid);
-  if(liked)
+    const blogid = req.params.id;
+    const userid = req.user._id;
+   
+  const liked = await blogService.addorremovelike(blogid,userid);
+  if(liked == 201)
   {
 
     
-    res.status(200).json({"message":"like added"})
+    res.status(201).json({"message":"like added"})
+  }
+  else if(liked == 200){
+    res.status(200).json({"message":"like removed"})
   }
   else{
-    res.status(201).json({"message":"like removed"})
+    res.status(500).json({"message":"Blog not found"})
   }
 }
 catch(err)
@@ -183,29 +200,35 @@ exports.newRoute = async (req, res) => {
       },currentuser
    });
 };
-
 exports.getBlogById = async (req, res) => {
-  console.log("In getBlogById controller");
+  try {
+    console.log("In getBlogById controller");
 
     const id = req.params.id;
-    try {
-      const blog = await blogService.getBlogById(id);
-      const user = await userService.getUserById(req.user._id);
-      res.render('specficblog', { 
-        blog, 
-        user,
-        messages: {
+    if (!id) {
+      return res.status(400).send('Blog ID is required');
+    }
+    
+    const blog = await blogService.getBlogById(id);
+    if (!blog) {
+      return res.status(404).send('Blog not found');
+    }
+
+    const user = req.user ? await userService.getUserById(req.user._id) : null;
+    res.render('specficblog', { 
+      blog, 
+      user,
+      messages: {
         success: req.flash('success'),
         error: req.flash('error')
-      },currentuser
-        });
-    } catch (error) {
-      console.error('Error fetching blog:', error);
-      res.status(500).send('Internal Server Error');
-    }
- 
+      },
+      currentuser: user
+    });
+  } catch (error) {
+    console.error('Error fetching blog:', error);
+    res.status(500).send('Internal Server Error');
+  }
 };
-
 
 
 const storage = multer.diskStorage({
@@ -240,31 +263,46 @@ function checkFileType(file, cb){
   }
 }
 exports.createBlog = async (req, res) => {
+  try {
+    console.log("In createBlog controller");
 
-  console.log("In createBlog controller");
-  upload (req, res, (err) => {
-    if(err){
-      return res.status(400).send(err);
-    }
-    const checkedOptions = req.body.myCheckboxes || [];
-    
-    const { title, content, subtitle } = req.body;
-    try {
-      blogService.createBlog(title, subtitle, content, req.user._id, req.file.filename,checkedOptions);
-      res.redirect('/blogs');
-    } catch (error) {
-      console.error('Error creating blog:', error);
-      res.status(500).send('Internal Server Error');
-    }
+    // Handle file upload and blog creation
+    upload(req, res, async (err) => {
+      if (err) {
+        console.error('File upload error:', err);
+        return res.status(400).send('File upload error');
+      }
 
-    
-  });
-    
+      const checkedOptions = req.body.myCheckboxes || [];
+      const { title, content, subtitle } = req.body;
+      const imageFilename = req.file ? req.file.filename : false; // Check if file exists
+
+      try {
+        // Create blog with or without image
+        await blogService.createBlog(
+          title,
+          subtitle,
+          content,
+          req.user._id,
+          checkedOptions,
+          imageFilename
+        );
+
+        // Redirect after successful creation
+        res.redirect('/blogs/myblogs');
+      } catch (error) {
+        console.error('Error creating blog:', error);
+        res.status(500).send('Internal Server Error');
+      }
+    });
+  } catch (error) {
+    console.error('Error in createBlog controller:', error);
+    res.status(500).send('Internal Server Error');
+  }
 };
-
 exports.editBlog = async (req, res) => {
   console.log("In editBlog controller");
-  if (req.isAuthenticated()) {
+    
     const id = req.params.id;
     try {
       const blog = await blogService.getBlogById(id);
@@ -281,23 +319,22 @@ exports.editBlog = async (req, res) => {
       }
     } catch (error) {
       console.error('Error fetching blog:', error);
-      res.status(500).send('Internal Server Error');
+    res.status(500).send('Internal Server Error');
     }
-  } else {
-    res.redirect('/login');
   }
-};
+ 
 
 exports.updateBlog = async (req, res) => {
+  try{
   console.log("In updateBlog controller");
-  if (req.isAuthenticated()) {
+
     const id = req.params.id;
     const { title, subtitle, content } = req.body;
     try {
       const blog = await blogService.getBlogById(id);
-      if (blog.user_id.equals(req.user._id)) {
+      if (blog.owner.equals(req.user._id)) {
         await blogService.updateBlogById(id, title, subtitle, content);
-        res.redirect('/myblogs');
+        res.redirect('/blogs/myblogs');
       } else {
         res.status(403).send('Unauthorized');
       }
@@ -305,9 +342,13 @@ exports.updateBlog = async (req, res) => {
       console.error('Error updating blog:', error);
       res.status(500).send('Internal Server Error');
     }
-  } else {
-    res.redirect('/login');
   }
+  catch(err)
+  {
+    console.error('Error fetching blog:', error);
+    res.status(500).send('Internal Server Error');
+  }
+ 
 };
 exports.getotherUsersblogs = async(req,res) =>
 {
@@ -315,7 +356,7 @@ exports.getotherUsersblogs = async(req,res) =>
     const page = req.query.page ? parseInt(req.query.page) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit) : 3;
     const blogs = await blogService.getUserBlogs(req.params.id,page,limit);
-    const currentuser =  userService.getUserById(req.user._id);
+    const currentuser = await  userService.getUserById(req.user._id);
 
     const totalBlogsCount = await Blog.countDocuments({ owner: { $ne: req.params.id } }).exec();
     
@@ -334,7 +375,7 @@ exports.getotherUsersblogs = async(req,res) =>
       },currentuser
      });
   } catch (error) {
-    console.error('Error fetching user blogs:', error);
+    console.error('Error fetching blog:', error);
     res.status(500).send('Internal Server Error');
   }
 
@@ -342,7 +383,7 @@ exports.getotherUsersblogs = async(req,res) =>
 exports.getUserBlogs = async (req, res) => {
   console.log("In getUserBlogs controller");
   const currentuser =  userService.getUserById(req.user._id);
-  if (req.isAuthenticated()) {
+
     try {
       const blogs = await blogService.getUserBlogs(req.user._id);
       res.render('myblogs', { blogs,
@@ -352,23 +393,20 @@ exports.getUserBlogs = async (req, res) => {
       },currentuser
        });
     } catch (error) {
-      console.error('Error fetching user blogs:', error);
-      res.status(500).send('Internal Server Error');
+      console.error('Error fetching blog:', error);
+    res.status(500).send('Internal Server Error');
     }
-  } else {
-    res.redirect('/login');
-  }
+ 
 };
-
 
 exports.getRandomBlogs = async (req, res) => {
   try {
     const userId = req.user._id;
     const page = req.query.page ? parseInt(req.query.page) : 1;
-    const limit = req.query.limit ? parseInt(req.query.limit) : 3; // Default limit to 3 if not provided
+    const limit = req.query.limit ? parseInt(req.query.limit) : 10; 
     const totalBlogsCount = await Blog.countDocuments({ owner: { $ne: userId } }).exec();
-    const currentuser =  userService.getUserById(req.user._id);
-    
+    const currentuser = await userService.getUserById(req.user._id); 
+
     const blogs = await blogService.getRandomBlogs(userId, page, limit);
 
     const pagination = {
@@ -379,31 +417,47 @@ exports.getRandomBlogs = async (req, res) => {
     };
 
     res.render('allblog', { blogs, pagination,
-        messages: {
+      messages: {
         success: req.flash('success'),
         error: req.flash('error')
-      },currentuser
-     });
+      }, currentuser
+    });
   } catch (err) {
-    console.log("Error rendering random blogs,", err);
-    res.status(500).send("Error occurred while rendering the blogs view");
+    console.error('Error fetching blog:', err); // Log the correct error
+    res.status(500).send('Internal Server Error');
   }
 };
+
 
 
 exports.getcatagories = async(req,res) =>
 {
   const tags = await blogService.gettags();
   const currentuser =  userService.getUserById(req.user._id);
-  res.render("Blogcatagories",{ tags,currentuser } )
+  res.render("Blogcatagories",{ tags,currentuser,messages: {
+        success: req.flash('success'),
+        error: req.flash('error')
+      }, } )
 }
 
+
+exports.getc= async(req,res) =>
+{
+  console.log("in the controller function")
+  res.render("newtag")
+}
 exports.newtag = async(req,res) =>
 {
+  try{
   console.log("in the new catagories")
 
   const name = blogService.newtag(req.body.name,req.body.slug);
   res.redirect("/blogs/catagories")
+  }
+  catch(err)
+  {
+    res.status(500).send('Error occurred');
+  }
 }
 
 

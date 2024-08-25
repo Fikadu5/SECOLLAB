@@ -6,6 +6,9 @@ const { User } = require("../models/user");
 const bcrypt = require("bcrypt");
 const nodemailer = require('nodemailer');
 const flash = require('connect-flash');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 
 
 exports.getsearchresult = async(req,res) =>
@@ -45,7 +48,8 @@ exports.getUsers = async (req, res) => {
       logged_in: req.isAuthenticated()
     });
   } catch (error) {
-    console.error(error);
+    console.error('Error in getUsers controller:', error);
+  
     res.status(500).send("Internal Server Error");
   }
 };
@@ -240,25 +244,61 @@ exports.explore = async(req,res) =>
 }
 exports.rendercontact = async(req,res) =>
 {
-  if(req.isAuthenticated())
-  {
-    const currentuser =  userService.getUserById(req.user._id);
-    res.render("contact",currentuser)
-
-  }
-  else{
-    res.render("contact",currentuser)
-
-  }
   
+    const currentuser=  await userService.getUserById(req.user._id);
+    res.render("contact",{currentuser})
+
+  }
+ 
+  
+const storage = multer.diskStorage({
+  destination: 'public/uploads/',
+  filename: function(req, file, cb){
+      cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+  }
+});
+
+// Initialize upload variable
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 1000000 }, // 1MB limit
+  fileFilter: function(req, file, cb){
+      checkFileType(file, cb);
+  }
+}).single('image');
+
+// Check file type
+function checkFileType(file, cb){
+  // Allowed ext
+  const filetypes = /jpeg|jpg|png|gif/;
+  // Check ext
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  // Check mime
+  const mimetype = filetypes.test(file.mimetype);
+
+  if(mimetype && extname){
+      return cb(null, true);
+  } else {
+      cb('Error: Images Only!');
+  }
 }
+
 exports.editProfileChange = async(req, res) => {
   try {
+    upload(req, res, (err) => {
+      if(err){
+        return res.status(400).send(err);
+      } 
+      if (!req.file) {
+        return false
+      } })
+      
     console.log("in the controller function")
     const details = req.body;
     const userid = req.user._id;
+    const imageFilename = req.file ? req.file.filename : false; // Check if file exists
 
-    await userService.editProfile(details, userid);
+    await userService.editProfile(details, userid, imageFilename);
     
     res.redirect("/");
   } catch (error) {
@@ -266,9 +306,15 @@ exports.editProfileChange = async(req, res) => {
     res.status(500).send('An error occurred while updating the profile');
   }
 }
+exports.deleteaccount = async(req,res) =>
+{
+  const currentuser=  await userService.getUserById(req.user._id);
+  res.render("deleteaccount",{currentuser})
+}
+
 
 exports.deleteUser = async (req, res) => {
-  if (req.isAuthenticated()) {
+  await userService.deleteUserById(req.user._id);
     try {
       req.logout((err,succ) =>
       {
@@ -280,16 +326,14 @@ exports.deleteUser = async (req, res) => {
           console.log(succ)
         }
       });
-      await userService.deleteUserById(req.user._id);
+      
       
       res.redirect("/");
     } catch (error) {
       console.error('Error deleting user:', error);
       res.status(500).send('Internal Server Error');
     }
-  } else {
-    res.redirect("/login");
-  }
+  
 };
 
 exports.getOtherUserProfile = async (req, res) => {
@@ -453,5 +497,44 @@ exports.follow = async (req, res) => {
   } else {
     
     res.status(400).json({ message: "User already follows the other user" });
+  }
+};
+
+
+
+
+
+
+
+
+exports.delete_photo = async (req, res) => {
+  try {
+    const currentuser =  await userService.getUserById(req.user._id);
+ 
+
+      // Ensure the profile photo exists
+      if (!currentuser || currentuser.image.length == 0) {
+          return res.status(400).json({ message: "No profile photo found" });
+      }
+
+      // Construct the file path
+      const filePath = path.join( 'public/uploads', path.basename(currentuser.image));
+
+      // Log the file path for debugging
+      console.log('File Path:', filePath);
+
+      // Delete the file
+      fs.unlink(filePath, (err) => {
+          if (err) {
+              // Handle file deletion errors
+              console.error('Error deleting the file:', err);
+              return res.status(500).json({ message: "Error deleting photo" });
+          }
+          const filepath = userService.removeinfophoto(req.user._id);
+          res.status(200).json({ message: "Successfully deleted photo" });
+      });
+  } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ message: "Internal server error" });
   }
 };

@@ -6,18 +6,21 @@ const userService = require('../services/userservice');
 
 
 
-exports.acceptinterest = async(req,res) =>{
+
+
+
+exports.acceptinterest = async (req, res) => {
+  console.log("accepted request");
+  const userId = req.params.userid;
   const projectid = req.params.projectid;
-  const userid = req.params.userid;
-  const acceptinterest = projectservice.acceptinterest();
-  if (acceptinterest)
-  {
-    res.status(200).json({"message":'added to the team'});
-  }
-  else{
+  const result = await projectservice.acceptinterest(projectid, userId);
+  if (result) {
+    res.status(200).json({ message: 'added to the team' });
+  } else {
     res.status(500).send('Internal Server Error');
   }
-}
+};
+
 
 
 
@@ -49,13 +52,23 @@ exports.newproject = async(req,res) =>
     };
 exports.getcatagories = async(req,res) =>
       {
-        const tags = await projectService.gettags();
+        const tags = await projectservice.gettags();
         const currentuser =  userService.getUserById(req.user._id);
-        res.render("projectcatagories",{tags,currentuser})
+        res.render("projectcatagories",{tags,currentuser,messages: {
+        success: req.flash('success'),
+        error: req.flash('error')
+      },})
       }
 
 exports.getsearchresult = async(req,res) =>
 {
+  const query = req.params.text
+  const projects = await projectservice.searchProjects(query);
+  const currentuser =  await userService.getUserById(req.user._id);
+  res.render("project",{projects, currentuser,messages: {
+        success: req.flash('success'),
+        error: req.flash('error')
+      }})
 
 }
 
@@ -100,8 +113,8 @@ exports.getMyProjects = async(req,res) =>
 exports.getmycollabration = async(req,res) =>
 {
     const id = req.user._id;
-    const projects = projectservice.getcollabration(id)
-    const currentuser =  userService.getUserById(req.user._id);
+    const projects = await projectservice.getcollabration(id)
+    const currentuser = await  userService.getUserById(req.user._id);
 
     res.render("mycollabration",{
         projects,
@@ -176,7 +189,7 @@ exports.getFollowingProjects = async(req,res) =>
     const projects = await projectservice.getfollowingprojects(req.user._id);
     const currentuser =  userService.getUserById(req.user._id);
 
-    res.render("projects",{projects,
+    res.render("project",{projects,
       messages: {
         success: req.flash('success'),
         error: req.flash('error')
@@ -187,8 +200,9 @@ exports.getFollowingProjects = async(req,res) =>
 
 exports.deleteproject = async(req,res) =>
 {
+  try{
     const id = req.params.id
-    const del = projectservice.deleteproject(id);
+    const del = await projectservice.deleteproject(id);
     if(del)
     {
      
@@ -197,10 +211,15 @@ exports.deleteproject = async(req,res) =>
     }
     else{
   
-        req.flash('error', 'project deletion not successful');
+        req.flash("error", "project deletion not successful");
         res.redirect("/projects/myprojects")
     }
-    
+  }
+  catch(err)
+  {
+    console.log(err)
+    res.status(500).json("something went wrong")
+  }
 
 }
 
@@ -217,7 +236,32 @@ exports.registerInterestwithid = async(req,res) =>
 
     }
     else{req.flash('error', 'Interest already registered');
+      
     }
-    res.redirect("/projects");
+    res.redirect("/projects/projects/"+projectId);
 }
+
+
+
+exports.getcatprojects = async(req,res) =>
+{
+  try{
+  const name = req.params.name;
+  const projects= await projectservice.get_catblogs(name);
+  const currentuser =  await userService.getUserById(req.user._id);
+ 
+    res.render("project", {projects,
+      messages: {
+      success: req.flash('success'),
+      error: req.flash('error')
+    },currentuser
+ })
+  }
+  catch(err)
+  {
+    console.log(err)
+  }
+  
+}
+
 
