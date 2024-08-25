@@ -32,7 +32,7 @@
   <div class="container">
     <div class="form-container">
       <h2>Edit your profile</h2>
-      <form action="/editprofile" method="POST">
+      <form action="/editprofile" method="POST" enctype="multipart/form-data">
         <div class="form-group">
           <label for="fname">First Name:</label>
           <input type="text" id="fname" name="fname" value="<%= user.fname %>" required>
@@ -41,17 +41,18 @@
           <label for="lname">Last Name:</label>
           <input type="text" id="lname" name="lname" value="<%= user.lname %>" required>
         </div>
-        <!-- <div class="form-group">
+        <div class="form-group">
           <label for="img">Select image:</label>
-          <% if(user.image && user.image.length > 0) { %>
-            <input type="file" name="image" id="img1">
+          <% if (user.image && user.image.length > 0 && user.image != "noprofile.jpg") { %>
+            
+            <input type="file" name="image" id="img">
             <p>Change profile photo</p>
             <img src="/uploads/<%= user.image %>" alt="Profile Photo" style="max-width: 200px; max-height: 300px;"><br>
-            <button id="delete">Delete profile photo</button>
+            <button type="button" id="delete" data-image="<%= user.image %>">Delete profile photo</button>
           <% } else { %>
             <input type="file" name="image" id="img">
           <% } %>
-        </div> -->
+        </div>
         <div class="form-group">
           <label for="email">Email:</label>
           <input type="email" id="email" name="email" value="<%= user.email %>" required>
@@ -121,6 +122,45 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
   <script src="https://kit.fontawesome.com/3259a3ed9a.js" crossorigin="anonymous"></script>
   <script src="/js/darkmode.js"></script>
+  <script>
+  document.getElementById('delete').addEventListener('click', function() {
+    // Get the image URL from the button's data attribute
+    const imageUrl = this.getAttribute('data-image');
+
+    // Show confirmation dialog
+    const isConfirmed = confirm('Are you sure you want to delete your profile photo?');
+
+    if (isConfirmed) {
+      
+fetch('http://localhost:3000/deleteprofile', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    // add any other necessary headers here
+  },
+  body: JSON.stringify({}) // include an empty object since you're not passing any data
+})
+.then(response => {
+  if (response.status === 200) {
+  
+    document.getElementById('delete').textContent = "Deleted";
+
+  } 
+  return response.json();
+})
+.then(data => {
+  // handle the response data here
+  console.log(data);
+})
+.catch(error => {
+  // handle any errors here
+  console.error('Error:', error);
+});
+
+        
+    }
+});
+</script>
 </body>
 </html>
 
