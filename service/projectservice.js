@@ -1,6 +1,27 @@
 const Project = require('../models/project');
 const ProjectTag = require('../models/projecttag');
-const User = require('../models/user');
+const {User,Follow} = require('../models/user');
+
+
+
+
+exports.getfollowingprojects = async(userId) =>
+{
+   // 1. Find all users that the given user is following
+   const followings = await Follow.find({ follower: userId }).populate('following').exec();
+    
+   // Extract the following users' IDs
+   const followingUserIds = followings.map(follow => follow.following._id);
+
+   if (followingUserIds.length === 0) {
+     return []; // No blogs if the user is not following anyone
+   }
+   const projects = await Project.find({owner:{$in:followingUserIds}}).populate("owner").populate("tags")
+   return projects;
+
+}
+
+
 exports.getProjects = async (id) => {
   try{
     console.log("fetching from database");
@@ -15,6 +36,38 @@ exports.getProjects = async (id) => {
 };
 
 
+
+
+exports.registerInterest = async (projectId, userId) => {
+ 
+  try {
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return false
+    }
+    if (project.requests.includes(userId)) {
+      
+      console.log("Interest already registered");
+      return FileSystemWritableFileStream;
+    }
+    if(project.collaborators.includes(userId))
+    {
+      
+      console.log("already in the team");
+      return false
+    }
+    
+    project.requests.push(userId);
+    await project.save();
+    
+    console.log("Interest registered successfully");
+    return true
+  } catch (err) {
+    console.log(err);
+   
+    return false
+  }
+};
 exports.createProject = async (projectDetails,user_id,checkedOptions) => {
   const project = new Project({
     title:projectDetails.name,
@@ -37,13 +90,22 @@ exports.gettags = async() =>
     const tags = await ProjectTag.find();
     return tags
 
+  } 
+
+
+
+
+
+exports.searchProjects = async(query) => {
+  try {
+    const projects = await Project.find({
+      $text: { $search: query }
+    });
+    return projects;
+  } catch (err) {
+    console.error('Error searching projects:', err);
+    throw err;
   }
-
-
-exports.searchProjects = async(query) =>
-{
-  const project = Project.find({$title:{$search:query}});
-  return project;
 }
 
 
@@ -66,6 +128,8 @@ exports.getMyProject = async (id) => {
     console.log("An error occurred while fetching projects.", error );
   }
 };
+
+
 exports.getProjectById = async (projectId) => {
   try {
     return await Project.findById(projectId)
@@ -78,8 +142,13 @@ exports.getProjectById = async (projectId) => {
   }
 };
 
+
 exports.getUserProjects = async (userId) => {
   try {
+    if(userId == null)
+    {
+      throw new Error('Error fetching user projects')
+    }
     return await Project.find({ user_id: userId });
   } catch (error) {
     throw new Error('Error fetching user projects');
@@ -96,19 +165,36 @@ exports.getProject = async() =>
   }
 }
 
-exports.getfollowingprojects = async() =>
+
+
+
+
+exports.acceptinterest = async(projectid,userId) =>
 {
-  Project.findByIdAndUpdate(projectId,
-    {$pull:{requests:userId}},
-    {new: true, useFindAndModify: false}
-  )
-  .then((project) => {
-    console.log('Project updated:', project);
-  })
-  .catch((error) => {
-    console.error('Error updating project:', error);
-  })
-}
+ 
+  try {
+    const project = await Project.findById(projectid);
+    if (!project) {
+      return false
+    }
+    if(project.owner == userId)
+    {
+      return false
+    }
+    if (project.collaborators.includes(userId)) {
+      console.log("already in the team");
+      return false
+    }
+    project.collaborators.push(userId);
+    project.requests.pull(userId);
+    await project.save();
+    console.log("Successfully saved");
+    return false
+  } catch (err) {
+    console.log(err);
+    return false
+  }
+} 
 
 
 exports.getMyProjectbyid = async(id) =>
@@ -123,7 +209,16 @@ exports.getMyProjectbyid = async(id) =>
 exports.getcollabration = async(id) =>
 {
   try{
-  const project = await Project.find({collaborators:id});
+  let project =[]
+  const projects = await Project.find();
+    projects.forEach(async(p) =>
+    {
+      if( p.collaborators.includes(id))
+      {
+        project.push(p);
+      }
+    })
+  
   return project
   }
   catch(err)
@@ -133,17 +228,38 @@ exports.getcollabration = async(id) =>
 }
 
 
-exports.deleteproject = async(id) =>
-{
-  try{
-    const project = Project.deleteOne({_id:id})
-    return project;
+exports.deleteproject = async (id) => {
+  try {
+    const result = await Project.deleteOne({ _id: id });
+    return result;
+  } catch (err) {
+    console.error('Error deleting project:', err);
+    throw err; // Re-throw the error to be handled by the caller or the test
+  }
+};
+exports.get_catblogs= async(name) =>
 
-  }
-  catch(err)
   {
-    console.log(err)
-  }
+    console.log(name)
+    const projecttag = await ProjectTag.findOne({ name: name });
+if (!projecttag) {
+  console.log("Tag not found");
+  return; // Exit if the tag doesn't exist
+}
+console.log(projecttag._id); // Should log a valid ObjectId
+
+const projects = await Project.find({ tags: { $in: [projecttag._id] } }).sort({ created_at: 1 }).populate("tags");
+console.log(projects); // Check if any blogs are returned
+
+
+if (projects) {
+  // Blog found with the specified tag
+  return projects
+} else {
+  // Blog not found with the specified tag
+  console.log("project not found")
+  
 }
 
 
+  }
