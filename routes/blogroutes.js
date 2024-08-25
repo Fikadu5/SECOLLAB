@@ -4,7 +4,7 @@ const { getBlogs, getBlogById, createBlog, editBlog, updateBlog,getotherUsersblo
   newtag,tags,getcatblogs, getc,checklike,
   addorremovelike} = require('../controllers/blogcontroller');
 const { ensureAuthenticated } = require('../middleware/authMiddleware');
-const { authenticateToken  } = require('../middleware/tokenauthenticationmiddleware');
+
 const { getsearchresult } = require('../services/userservice');
 const { getUserBlogs } = require('../services/blogservice');
 const router = express.Router();
