@@ -9,7 +9,8 @@ const passportLocalMongoose = require('passport-local-mongoose');
 const flash = require('connect-flash');
 const userService = require('../services/userservice');
 const bcrypt = require("bcrypt")
-// Setup Multer storage
+
+// Set up Multer storage configuration
 const storage = multer.diskStorage({
   destination: 'public/uploads/',
   filename: function(req, file, cb) {
@@ -17,22 +18,22 @@ const storage = multer.diskStorage({
   }
 });
 
-// Initialize upload variable
+// Initialize Multer upload
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 1000000 }, // 1MB limit
+  limits: { fileSize: 1000000 }, // 1MB file size limit
   fileFilter: function(req, file, cb) {
     checkFileType(file, cb);
   }
 }).single('image');
 
-// Check file type
+// Check file type for image uploads
 function checkFileType(file, cb) {
-  // Allowed extensions
+  // Allowed file extensions
   const filetypes = /jpeg|jpg|png|gif/;
-  // Check extension
+  // Check file extension
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-  // Check mime type
+  // Check MIME type
   const mimetype = filetypes.test(file.mimetype);
 
   if (mimetype && extname) {
@@ -49,20 +50,23 @@ router.post('/signup',async (req, res) => {
       return res.status(400).send(err);
     }
 
+    // Extract user data from the request body
     const { fname, lname, username, twitter, phone_number, github, previous, country, city, skills, email, education_status, employment_status, age, about_me, password, confirm_password } = req.body;
     
+    // Check if the passwords match
     if (password !== confirm_password) {
       req.flash('error','passwords do not match')
       return res.status(400).send('Error: Passwords do not match!');
     }
 
-   
+    // Check if the email is already taken
     const check_email = await User.find({email})
     if (check_email)
     {
       req.flash('error','email already taken')
     }
-    // Create user object
+
+    // Create a new user object
     const newUser = new User({
       fname,
       lname,
@@ -82,6 +86,7 @@ router.post('/signup',async (req, res) => {
       image: req.file ? req.file.filename : "noprofile.jpg" 
     });
 
+    // Register the new user using passport-local-mongoose
     User.register(newUser, password, (err, user) => {
       if (err) {
         req.flash('error','error with account creation')
@@ -89,6 +94,7 @@ router.post('/signup',async (req, res) => {
         return res.redirect('/authenticate/signup');
       }
 
+      // Log in the newly registered user
       req.login(user, (err) => {
         if (err) {
           console.log('Error logging in after registration:', err);
@@ -99,6 +105,8 @@ router.post('/signup',async (req, res) => {
     });
   });
 });
+
+// Login route
 router.get('/login', (req, res) => {
   res.render('login', {
     messages: {
@@ -107,6 +115,8 @@ router.get('/login', (req, res) => {
     }
   });
 });
+
+// Handle login
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', { 
     failureRedirect: '/authenticate/login', 
@@ -137,6 +147,7 @@ router.post('/login', (req, res, next) => {
   })(req, res, next);
 });
 
+// Logout route
 router.get('/logout', (req, res) => {
   req.logout((err) => {
     if (err) {
@@ -146,13 +157,15 @@ router.get('/logout', (req, res) => {
   });
 });
 
+// Signup page route
 router.get('/signup', (req, res) => {
   res.render('signup', { messages: {
         success: req.flash('success'),
         error: req.flash('error' )}
   })
-      });
+});
 
+// Change password page route
 router.get("/changepassword", ensureAuthenticated, async(req, res) => {
   try {
     const currentuser = await userService.getUserById(req.user._id);
@@ -164,8 +177,7 @@ router.get("/changepassword", ensureAuthenticated, async(req, res) => {
   }
 });
 
-
-// Route to handle password change
+// Change password route
 router.post('/change-password', async (req, res) => {
   const { currentPassword, newPassword, confirmNewPassword } = req.body;
 
@@ -177,14 +189,14 @@ router.post('/change-password', async (req, res) => {
       }
 
       // Find the user from the session or database
-      const user = await User.findById(req.user._id); // Ensure req.user is populated with the logged-in user
+      const user = await User.findById(req.user._id); 
 
       if (!user) {
         res.redirect('/authenticate/change-password');
       }
 
       // Check if the current password is correct
-      const isMatch = await bcrypt.compare(currentPassword, user.hash); // Use user.hash to compare
+      const isMatch = await bcrypt.compare(currentPassword, user.hash); 
 
       if (!isMatch) {
         req.flash('error','Current password is incorrect')
@@ -196,7 +208,7 @@ router.post('/change-password', async (req, res) => {
       const hashedPassword = await bcrypt.hash(newPassword, salt);
 
       // Update the user's password
-      user.hash = hashedPassword; // Update with the new hashed password
+      user.hash = hashedPassword; 
       await user.save();
         req.flash('success','Password changed successfully')
       res.redirect('/authenticate/change-password');
@@ -206,7 +218,7 @@ router.post('/change-password', async (req, res) => {
   }
 });
 
-
+// Username availability check route
 router.get('/check-username', async (req, res) => {
   const { username } = req.query;
 
@@ -225,9 +237,5 @@ router.get('/check-username', async (req, res) => {
     res.status(500).json({ available: false, message: 'Server error' });
   }
 });
-
-
-
-
 
 module.exports = router;
