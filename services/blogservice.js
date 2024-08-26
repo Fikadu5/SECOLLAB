@@ -1,51 +1,49 @@
 const Blog = require('../models/blog');
-const {User,Follow} = require('../models/user');
+const { User, Follow } = require('../models/user');
 const userService = require('../services/userservice');
-const BlogTag = require("../models/Blogtag")
+const BlogTag = require("../models/Blogtag");
 
+// Get the current user
+exports.getCurrentUser = async (id) => {
+  const user = await User.find({ _id: id });
+  return user;
+};
 
-
-
-
-
-
-exports.getCurrentUser = async(id)=>
-{
-  const user = await User.find({_id:id});
-  return user
-}
-
+// Get the blogs of the current user
 exports.getMyBlogs = async (id, page, limit) => {
   try {
+    // Fetch the blogs of the current user, sorted by creation date in descending order,
+    // and paginate the results
     return await Blog.find({ owner: id })
-    .populate("owner")
-    .sort({ created_at: -1 })
-    .skip((page - 1) * limit)
-    .limit(limit)
-    .exec();
+      .populate("owner")
+      .sort({ created_at: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .exec();
   } catch (error) {
     throw new Error('Error fetching blogs');
   }
-}
-exports.getBlogs = async(id) =>
-{
-   const blogs = await Blog.find({owner:{$ne:id}})
-   .sort({ created_at: -1 })
-   .populate("tags")
-   .populate("owner");
+};
+
+// Get all blogs except the current user's blogs
+exports.getBlogs = async (id) => {
+  const blogs = await Blog.find({ owner: { $ne: id } })
+    .sort({ created_at: -1 })
+    .populate("tags")
+    .populate("owner");
 
   return blogs;
-}
-exports.getTopBlogs = async (page, limit,id) => {
-  try {
-    const blogs = await Blog.find({owner:{$ne:id}})
-      .populate("tags")
+};
 
+// Get the top blogs (based on likes) except the current user's blogs
+exports.getTopBlogs = async (page, limit, id) => {
+  try {
+    const blogs = await Blog.find({ owner: { $ne: id } })
+      .populate("tags")
       .sort({ like: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .exec();
-
 
     return blogs;
   } catch (err) {
@@ -54,6 +52,7 @@ exports.getTopBlogs = async (page, limit,id) => {
   }
 };
 
+// Get random blogs except the current user's blogs
 exports.getRandomBlogs = async (userId, page, limit) => {
   try {
     // Step 1: Aggregate to get raw blog IDs
@@ -78,70 +77,63 @@ exports.getRandomBlogs = async (userId, page, limit) => {
     throw err;
   }
 };
-exports.deleteBlog = async(id, userid) =>{
-  try{
-  const blog = Blog.deleteOne({_id:id,owner:userid})
-  return blog;
-  }
-  catch(err)
-  {
-    console.log(`Error from fetchinf the database ${err}`)
-  }
-}
 
+// Delete a blog
+exports.deleteBlog = async (id, userid) => {
+  try {
+    const blog = Blog.deleteOne({ _id: id, owner: userid });
+    return blog;
+  } catch (err) {
+    console.log(`Error from fetching the database ${err}`);
+  }
+};
 
+// Get a blog by its ID
 exports.getBlogById = async (blogId) => {
   try {
-    
-    const blog =  await Blog.findById(blogId).populate("owner").populate("tags")
-    console.log(blog)
-    return blog
+    const blog = await Blog.findById(blogId).populate("owner").populate("tags");
+    console.log(blog);
+    return blog;
   } catch (error) {
     throw new Error('Error fetching blog', error);
   }
 };
 
+// Create a new blog
+exports.createBlog = async (title, subtitle, content, userId, checkedOptions, image) => {
+  if (image) {
+    const blog = new Blog({
+      title,
+      subtitle,
+      body: content,
+      owner: userId,
+      image,
+      tags: checkedOptions
+    });
 
-exports.createBlog = async (title, subtitle, content, userId,checkedOptions,image) => {
- if(image)
- {
-  const blog = new Blog({
-    title,
-    subtitle,
-    body: content,
-    owner: userId,
-    image,
-    tags:checkedOptions,
-  });
+    try {
+      await blog.save();
+    } catch (error) {
+      throw new Error('Error creating blog');
+    }
+  } else {
+    const blog = new Blog({
+      title,
+      subtitle,
+      body: content,
+      owner: userId,
+      tags: checkedOptions
+    });
 
-  try {
-    await blog.save();
-  } catch (error) {
-    throw new Error('Error creating blog');
+    try {
+      await blog.save();
+    } catch (error) {
+      throw new Error('Error creating blog');
+    }
   }
-
- }
- else{
-  const blog = new Blog({
-    title,
-    subtitle,
-    body: content,
-    owner: userId,
-    
-    tags:checkedOptions,
-  });
-
-  try {
-    await blog.save();
-  } catch (error) {
-    throw new Error('Error creating blog');
-  }
-
- }
-
-  
 };
 
+// Update a blog by its ID
 exports.updateBlogById = async (blogId, title, subtitle, content) => {
   try {
     const updatedBlog = await Blog.findByIdAndUpdate(
@@ -155,29 +147,28 @@ exports.updateBlogById = async (blogId, title, subtitle, content) => {
   }
 };
 
-exports.getUserBlogs = async (userId,page,limit) => {
+// Get the blogs of a user
+exports.getUserBlogs = async (userId, page, limit) => {
   try {
-    const blogs = await Blog.aggregate([
-      { $match: { user_id: userId} }, // Exclude blogs by the current user
-      { $sample: { size: 1000 } }, // Get a large random sample to paginate from
-      { $skip: (page - 1) * limit }, // Skip the first (page - 1) * limit blogs
-      { $limit: limit } ,
-      { $sort: { created_at: -1 } },
-    ]);
-    return blogs
-     
+    const blogs = await Blog.find({ owner: userId })
+      .populate("tags")
+      .sort({ like: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .exec();
+
+    return blogs;
   } catch (error) {
     throw new Error('Error fetching user blogs');
   }
 };
 
-
-
+// Get the blogs of users the current user is following
 exports.getFollowingBlogs = async (userId) => {
   try {
     // 1. Find all users that the given user is following
     const followings = await Follow.find({ follower: userId }).populate('following').exec();
-    
+
     // Extract the following users' IDs
     const followingUserIds = followings.map(follow => follow.following._id);
 
@@ -196,125 +187,99 @@ exports.getFollowingBlogs = async (userId) => {
   }
 };
 
-
-
-
+// Search for blogs by their title
 exports.getsearchresult = async (query) => {
   try {
-    console.log("in the search result service")
-     
-    const blogs = await Blog.find({title:query})
-    
+    console.log("in the search result service");
+    const blogs = await Blog.find({ title: query });
     return blogs;
   } catch (err) {
     console.error('Error searching projects:', err);
-   
   }
 };
 
-exports.addorremovelike = async (blogid,userid) => {
-  console.log("in the service")
-  // const userid = await req.user._id;
-  // console.log(userid);
-  try{
-  
+// Add or remove a like from a blog
+exports.addorremovelike = async (blogid, userid) => {
+  console.log("in the service");
+  try {
     const blog = await Blog.findById(blogid);
-  
+
     if (!blog) {
       console.log("Blog not found");
       throw new Error("Blog not found");
     }
-  
+
     if (blog.likedby.includes(userid)) {
       console.log("like decremented");
       blog.like--;
       blog.likedby.pull(userid);
       await blog.save();
-      return 200
+      return 200;
     } else {
       console.log("like incremented");
       blog.like++;
       blog.likedby.push(userid);
       await blog.save();
-      return 201
+      return 201;
     }
-  }
-   catch (err) {
+  } catch (err) {
     console.log(err);
     throw err;
-  }}
-
-
-  exports.checklike = async(id,userid) =>
-  {
-    
- const blog =  await Blog.findById(id)
- if(blog.likedby.includes(userid))
- {
-  return 200
-   
- }
- else{
-  return 201
-  
- }
   }
- 
+};
 
+// Check if the current user has liked a blog
+exports.checklike = async (id, userid) => {
+  const blog = await Blog.findById(id);
+  if (blog.likedby.includes(userid)) {
+    return 200;
+  } else {
+    return 201;
+  }
+};
 
-
-exports.gettags = async() =>
-{
+// Get all blog tags
+exports.gettags = async () => {
   const tags = await BlogTag.find();
-  if(tags)
-  {
-  return tags;
-  }
-  else{
+  if (tags) {
+    return tags;
+  } else {
     console.log("problem fetching from the database");
   }
+};
 
+// Create a new blog tag
+exports.newtag = async (name, description) => {
+  try {
+    const Blogtag = new BlogTag({
+      name,
+      description
+    });
+    Blogtag.save();
+    return Blogtag;
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+};
 
-}
-
-exports.newtag = async(name,description) =>
-{
-  try{
-  const Blogtag = new BlogTag({
-    name,
-    description
-  })
-  Blogtag.save()
-  return Blogtag
-}
-catch(err)
-{
-  console.log(err)
-  throw(err)
-}
-  
-}
-
-
-exports.getcatblogs = async(name, id) =>
-{
+// Get blogs by a specific tag, excluding the current user's blogs
+exports.getcatblogs = async (name, id) => {
   const blogtag = await BlogTag.findOne({ name: name });
-if (!blogtag) {
-  console.log("Tag not found");
-  return; // Exit if the tag doesn't exist
-}
-console.log(blogtag._id); // Should log a valid ObjectId
+  if (!blogtag) {
+    console.log("Tag not found");
+    return; // Exit if the tag doesn't exist
+  }
+  console.log(blogtag._id); // Should log a valid ObjectId
 
-const blogs = await Blog.find({ tags: { $in: [blogtag._id] }, owner:{$ne: id} }).sort({ created_at: 1 }).populate("tags");
-console.log(blogs); // Check if any blogs are returned
+  const blogs = await Blog.find({ tags: { $in: [blogtag._id] }, owner: { $ne: id } }).sort({ created_at: 1 }).populate("tags");
+  console.log(blogs); // Check if any blogs are returned
 
-
-if (blogs) {
-  // Blog found with the specified tag
-  return blogs
-} else {
-  // Blog not found with the specified tag
-  console.log("blog not found")
-  
-}
-}
+  if (blogs) {
+    // Blogs found with the specified tag
+    return blogs;
+  } else {
+    // Blogs not found with the specified tag
+    console.log("blog not found");
+  }
+};

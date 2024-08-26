@@ -1,8 +1,27 @@
 const User = require('../models/user');
 const validator = require('validator');
 
+/**
+ * Creates and registers a new user.
+ * @param {Object} details - The details of the user to be created.
+ * @param {string} details.fname - The first name of the user.
+ * @param {string} details.lname - The last name of the user.
+ * @param {string} details.username - The username of the user.
+ * @param {string} details.twitter - The Twitter handle of the user.
+ * @param {string} details.phone_number - The phone number of the user.
+ * @param {string} details.github - The GitHub profile of the user.
+ * @param {string} details.previous - The previous experience of the user.
+ * @param {string} details.country - The country of the user.
+ * @param {string} details.city - The city of the user.
+ * @param {string} details.skills - The skills of the user.
+ * @param {string} details.email - The email of the user.
+ * @param {string} details.education_status - The education status of the user.
+ * @param {string} details.employment_status - The employment status of the user.
+ * @returns {Promise<User>} - The registered user.
+ */
 exports.createAndRegister = async (details) => {
     try {
+        // Create a new user instance
         const user = new User({
             fname: validator.escape(details.fname),
             lname: validator.escape(details.lname),
@@ -19,11 +38,13 @@ exports.createAndRegister = async (details) => {
             employment_status: validator.escape(details.employment_status)
         });
 
-        const registeredUser = user.save()
+        // Save the user and return the registered user
+        const registeredUser = await user.save();
         return registeredUser;
     } catch (error) {
         console.error('Problem with registering user:', error);
         if (error.errors) {
+            // Log validation errors
             for (let key in error.errors) {
                 console.error(`Validation error for ${key}: ${error.errors[key].message}`);
             }
