@@ -17,6 +17,8 @@ jest.mock('../middleware/authMiddleware', () => ({
 
 // Mock controllers
 jest.mock('../controllers/usercontrollers', () => ({
+  delete_photo:jest.fn((req, res) => res.status(200).send('Delete photo')),
+  deleteaccount:jest.fn((req, res) => res.status(200).send('Delete account')),
   getUsers: jest.fn((req, res) => res.status(200).send('Users List')),
   contactUser: jest.fn((req, res) => res.status(200).send('Contact User')),
   getProfile: jest.fn((req, res) => res.status(200).send('User Profile')),
