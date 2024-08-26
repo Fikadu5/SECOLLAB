@@ -114,3 +114,6 @@ body.dark-mode .unfollow-btn:hover {
 .pagination .page-link {
     color: #007bff;
 }
+a{
+    color:black !important;
+}

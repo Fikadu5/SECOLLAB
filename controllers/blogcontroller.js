@@ -176,7 +176,7 @@ exports.getTopBlogs = async (req, res) => {
 };
 
 // Controller function to check if a blog is liked
-exports.checkLike = async (req, res) => {
+exports.checklike= async (req, res) => {
   const userId = req.user._id;
   const id = xss(req.params.id);
   const blog = await blogService.checkLike(id, userId);
@@ -188,7 +188,7 @@ exports.checkLike = async (req, res) => {
 };
 
 // Controller function to add or remove a like on a blog
-exports.addOrRemoveLike = async (req, res) => {
+exports.addorremovelike = async (req, res) => {
   try {
     console.log("In the controller of the like");
     // Sanitize the blog ID parameter using xss
