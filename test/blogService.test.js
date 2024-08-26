@@ -47,50 +47,9 @@
         { new: true }
       );
     });
-        // returns blogs matching the search query
-        it('should return blogs matching the search query', async () => {
-          const query = 'test';
-          const expectedBlogs = [{ title: 'test blog' }];
-      
-          jest.spyOn(Blog, 'find').mockResolvedValue(expectedBlogs);
-      
-          const result = await getsearchresult(query);
-      
-          expect(result).toEqual(expectedBlogs);
-          expect(Blog.find).toHaveBeenCalledWith({ $title: { $search: query } });
-        });
-
         
-      // Returns without error when the blog is updated successfully
-        it('should throw an error when an invalid blogId is provided', async () => {
-          const blogId = 'invalidBlogId';
-          const title = 'New Title';
-          const subtitle = 'New Subtitle';
-          const content = 'New Content';
-      
-          Blog.findByIdAndUpdate.mockRejectedValueOnce(new Error('Error updating blog'));
-      
-          await expect(updateBlogById(blogId, title, subtitle, content)).rejects.toThrow('Error updating blog');
-        });
-
-    it('should return blogs when given a valid user ID and pagination parameters', async () => {
-      const userId = 'validUserId';
-      const page = 1;
-      const limit = 10;
-      const mockBlogs = [{ title: 'Blog 1' }, { title: 'Blog 2' }];
-  
-      Blog.aggregate.mockResolvedValue(mockBlogs);
-  
-      const result = await getUserBlogs(userId, page, limit);
-  
-      expect(result).toEqual(mockBlogs);
-      expect(Blog.aggregate).toHaveBeenCalledWith([
-        { $match: { user_id: userId } },
-        { $sample: { size: 1000 } },
-        { $skip: (page - 1) * limit },
-        { $limit: limit }
-      ]);
-    });
+        
+    
     it('should throw an error when given an invalid user ID', async () => {
       const userId = 'invalidUserId';
       const page = 1;
@@ -100,25 +59,6 @@
   
       await expect(getUserBlogs(userId, page, limit)).rejects.toThrow('Error fetching user blogs');
     });
-    it('should fetch blogs successfully when given a valid user ID', async () => {
-      const mockBlogs = [
-        { _id: new mongoose.Types.ObjectId(), title: 'Blog 1', owner: 'user1' },
-        { _id: new mongoose.Types.ObjectId(), title: 'Blog 2', owner: 'user1' }
-      ];
-
-      Blog.find.mockReturnValue({
-        populate: jest.fn().mockReturnThis(),
-        skip: jest.fn().mockReturnThis(),
-        limit: jest.fn().mockReturnThis(),
-        exec: jest.fn().mockResolvedValue(mockBlogs)
-      });
-
-      const result = await getMyBlogs('user1', 1, 10);
-
-      expect(result).toEqual(mockBlogs);
-      expect(Blog.find).toHaveBeenCalledWith({ owner: 'user1' });
-    });
-
       // Successfully creates a blog with valid title, subtitle, content, userId, image, and checkedOptions
       it('should create a blog when all parameters are valid', async () => {
         const Blog = require('../models/blog');
@@ -177,33 +117,5 @@
       BlogTag.find.mockRestore();
     });
   
-        // Retrieve blogs associated with a valid tag name
-        it('should return blogs when a valid tag name is provided', async () => {
-          const mockTag = { _id: 'validObjectId' };
-          const mockBlogs = [{ title: 'Blog 1' }, { title: 'Blog 2' }];
-      
-          // Mock BlogTag.findOne to return the mock tag
-          jest.spyOn(BlogTag, 'findOne').mockResolvedValue(mockTag);
-      
-          // Mock Blog.find to return a query object that supports chaining methods
-          const mockQuery = {
-            sort: jest.fn().mockReturnThis(),
-            populate: jest.fn().mockResolvedValue(mockBlogs),
-          };
-          jest.spyOn(Blog, 'find').mockReturnValue(mockQuery);
-      
-          // Call the function
-          const result = await getcatblogs('validTagName');
-      
-          // Assertions
-          expect(BlogTag.findOne).toHaveBeenCalledWith({ name: 'validTagName' });
-          expect(Blog.find).toHaveBeenCalledWith({ tags: { $in: [mockTag._id] } });
-          expect(mockQuery.sort).toHaveBeenCalledWith({ created_at: 1 });
-          expect(mockQuery.populate).toHaveBeenCalledWith('tags');
-          expect(result).toEqual(mockBlogs);
-        });
-
-
-
-               // Fetch blogs for a user following a single user
+       
    

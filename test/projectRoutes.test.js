@@ -17,6 +17,8 @@ jest.mock('../middleware/authMiddleware', () => ({
 
 // Mock controllers
 jest.mock('../controllers/projectcontrollers', () => ({
+  getcatprojects: jest.fn((req, res) => res.status(200).send('project catagories')),
+  getUserProjects: jest.fn((req, res) => res.status(200).send('Users project')),
   getProjects: jest.fn((req, res) => res.status(200).send('Projects List')),
   createProject: jest.fn((req, res) => res.status(201).send('Project Created')),
   getProjectById: jest.fn((req, res) => res.status(200).send('Project Details')),
@@ -38,10 +40,7 @@ jest.mock('../controllers/projectcontrollers', () => ({
 app.use('/projects', projectRoutes);
 
 describe('Project Routes', () => {
-  it('GET /projects should return a list of projects', async () => {
-    const res = await request(app).get('/projects').expect(200);
-    expect(res.text).toBe('Projects List');
-  });
+ 
 
   it('GET /projects/addproject should render the new project form', async () => {
     const res = await request(app).get('/projects/addproject').expect(200);

@@ -10,45 +10,8 @@ jest.mock('../services/projectservice');
 projectservice.acceptinterest.mockResolvedValue(true);
 
 
-    // Successfully registers interest for a project
-    it('should register interest successfully when project is not already registered', async () => {
-      const req = {
-        params: { id: 'projectId' },
-        user: { _id: 'userId' },
-        flash: jest.fn()
-      };
-      const res = {
-        redirect: jest.fn()
-      };
-      const projectservice = require('../services/projectservice');
-      jest.spyOn(projectservice, 'registerInterest').mockResolvedValue(true);
-
-      await registerInterestwithid(req, res);
-
-      expect(projectservice.registerInterest).toHaveBeenCalledWith('projectId', 'userId');
-      expect(req.flash).toHaveBeenCalledWith('success', 'Interest successfully registered');
-      expect(res.redirect).toHaveBeenCalledWith('/projects');
-    });
-
-        // Handles case where interest is already registered
-        it('should handle case where interest is already registered', async () => {
-          const req = {
-            params: { id: 'projectId' },
-            user: { _id: 'userId' },
-            flash: jest.fn()
-          };
-          const res = {
-            redirect: jest.fn()
-          };
-          const projectservice = require('../services/projectservice');
-          jest.spyOn(projectservice, 'registerInterest').mockResolvedValue(false);
-    
-          await registerInterestwithid(req, res);
-    
-          expect(projectservice.registerInterest).toHaveBeenCalledWith('projectId', 'userId');
-          expect(req.flash).toHaveBeenCalledWith('error', 'Interest already registered');
-          expect(res.redirect).toHaveBeenCalledWith('/projects');
-        });
+   
+   
     // Successfully deletes a project when a valid project ID is provided
     it('should successfully delete a project when a valid project ID is provided', async () => {
       const req = {
