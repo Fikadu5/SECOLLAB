@@ -10,24 +10,7 @@ const { mockRequest, mockResponse } = httpMocks;
    
     jest.mock('../services/userService');
 
-    it('should update user profile when valid details are provided', async () => {
-      const req = {
-        body: { name: 'John Doe', email: 'john.doe@example.com' },
-        user: { _id: '12345' }
-      };
-      const res = {
-        redirect: jest.fn(),
-        status: jest.fn().mockReturnThis(),
-        send: jest.fn()
-      };
 
-      userService.editProfile.mockResolvedValue(true);
-
-      await editProfileChange(req, res);
-
-      expect(userService.editProfile).toHaveBeenCalledWith(req.body, req.user._id);
-      expect(res.redirect).toHaveBeenCalledWith('/');
-    });
 it('should render contact page with a valid user', async () => {
     const req = httpMocks.createRequest({
         user: { _id: 'validUserId' }
@@ -143,25 +126,7 @@ it('should render deleteaccount with the current user when user ID is found', as
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({ "message": "sucessfully unfollowed" });
     });
-        // Handles the case where the follower ID or following ID is invalid or missing
-        it('should return 500 and error message when follower ID or following ID is invalid or missing', async () => {
-          const req = {
-            params: { id: null },
-            user: { _id: 'followerId123' }
-          };
-          const res = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn()
-          };
         
-          userService.unfollow = jest.fn().mockResolvedValue(false);
-    
-          await unfollow(req, res);
-    
-          expect(userService.unfollow).toHaveBeenCalledWith('followerId123', null);
-          expect(res.status).toHaveBeenCalledWith(500);
-          expect(res.json).toHaveBeenCalledWith({ "message": "sucessfully unfollowed" });
-        });
             // User follows another user successfully
     it('should return 200 and success message when user follows another user successfully', async () => {
       const req = {

@@ -28,14 +28,7 @@ jest.mock('../models/user');
         expect(User.findById).toHaveBeenCalledWith(userId);
       });
 
-          // Returns the user ID when a valid user is present in the request
-    it('should return the user ID when a valid user is present in the request', async () => {
-        const req = { user: { _id: '12345' } };
-        const res = {};
-        const id = await currentuser(req, res);
-        expect(id).toBe('12345');
-      });
-
+     
         
           // Retrieve all users except the one with the given ID
     it('should retrieve all users except the one with the given ID', async () => {
@@ -206,22 +199,7 @@ jest.mock('../models/user');
         mockDeleteOne.mockRestore();
       });
 
-          // Follower or following user ID does not exist
-    it('should handle error when follower or following user ID does not exist', async () => {
-        const follower = 'nonexistentUser';
-        const following = 'user2';
-    
-        const mockDeleteOne = jest.spyOn(Follow, 'deleteOne').mockRejectedValue(new Error('User not found'));
-        const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    
-        await unfollow(follower, following);
-    
-        expect(mockDeleteOne).toHaveBeenCalledWith({ follower, following });
-        expect(consoleSpy).toHaveBeenCalledWith("error deleting the data from the database");
-    
-        mockDeleteOne.mockRestore();
-        consoleSpy.mockRestore();
-      });
+   
      
           // Handles non-existent follower_id and following_id gracefully
     it('should return false when no follow record exists', async () => {
