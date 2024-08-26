@@ -1,75 +1,84 @@
-  body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 0;
-        }
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 0;
+}
 
-        .navbar {
-            background-color: #343a40;
-            color: white;
-        }
+.navbar {
+  background-color: #343a40;
+  color: white;
+}
 
-        .navbar-brand {
-            font-weight: bold;
-        }
+.navbar-brand {
+  font-weight: bold;
+}
 
-        .nav-link {
-            color: white;
-        }
+.nav-link {
+  color: white;
+}
 
-        .nav-link:hover {
-            color: #f8f9fa;
-        }
+.nav-link:hover {
+  color: #f8f9fa;
+}
 
-        .parent {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 20px;
-        }
+.parent {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 20px;
+}
 
-        .child {
-            background-color: #ffffff;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin: 10px;
-            width: 300px;
-        }
+.child {
+  background-color: #ffffff;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin: 0;
+  width: 300px;
+  box-sizing: border-box;
+}
 
-        .child p {
-            margin: 0;
-            padding: 0;
-            font-size: 16px;
-        }
+@media (max-width: 768px) {
+  .child {
+      width: calc(100% - 1rem);
+  }
+}
 
-        .child a {
-            display: block;
-            text-align: center;
-            margin-top: 10px;
-            color: #007bff;
-            text-decoration: none;
-        }
+.child p {
+  margin: 0;
+  padding: 0;
+  font-size: 16px;
+}
 
-        .child a:hover {
-            text-decoration: underline;
-        }
+.child a {
+  display: block;
+  text-align: center;
+  margin-top: 10px;
+  color: #007bff;
+  text-decoration: none;
+}
 
-        form button {
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 5px 10px;
-            margin-top: 10px;
-            cursor: pointer;
-        }
+.child a:hover {
+  text-decoration: underline;
+}
 
-        form button:hover {
-            background-color: #c82333;
-        }
-        .details-button {
+form button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+form button:hover {
+  background-color: #c82333;
+}
+
+.details-button {
   display: inline-block;
   padding: 10px 20px;
   font-size: 16px;
@@ -79,20 +88,16 @@
   border-radius: 4px;
   border: none;
   color: #fff;
-  background-color: #4CAF50;
+  background: linear-gradient(to right, #667eea, #764ba2);
   transition: background-color 0.3s ease;
   cursor: pointer;
 }
 
-.details-button {
-  /* Existing CSS properties */
-  background: linear-gradient(to right, #667eea, #764ba2); /* Gradient background */
+.details-button:hover {
+  background: linear-gradient(to right, #764ba2, #667eea);
 }
 
-.details-button:hover {
-  background: linear-gradient(to right, #764ba2, #667eea); /* Gradient background on hover */
-}
-       body.dark-mode {
+body.dark-mode {
   background-color: #121212;
   color: #e0e0e0;
 }
@@ -103,8 +108,6 @@ body.dark-mode .footer-bottom {
   background-color: #1e1e1e;
   color: #e0e0e0;
 }
-
-
 
 body.dark-mode .container {
   background-color: #1e1e1e;
@@ -160,34 +163,35 @@ body.dark-mode .btn-outline-success {
   border: 1px solid #444444;
 }
 
-
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
 }
-/* Ensure the container for tags can accommodate multiple tags */
+
 .blog-ta {
-  display: flex; /* Use flexbox to align tags side-by-side */
-  flex-wrap: wrap; /* Allow wrapping to the next line if necessary */
-  gap: 0.5rem; /* Adjust spacing between tags */
-  margin-top: 10px; /* Space above the tags */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 10px;
 }
 
-/* Style individual tags */
 .tag {
-  display: inline-block; /* Ensure tags are inline */
-  background-color: #9b59b6; /* Background color for the tag */
-  color: white; /* Text color */
-  padding: 0.5rem 1rem; /* Padding inside the tag */
-  border-radius: 20px; /* Rounded corners */
-  font-size: 0.8rem; /* Font size */
-  text-decoration: none; /* Remove underline from links */
-  margin-right: 0.5rem; /* Space between tags */
-  margin-bottom: 0.5rem; /* Space below tags */
-  transition: background-color 0.3s ease; /* Smooth background color transition */
+  display: inline-block;
+  background-color: #9b59b6;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  text-decoration: none;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+  transition: background-color 0.3s ease;
 }
 
 .tag:hover {
-  background-color: #8e44ad; /* Change background color on hover */
+  background-color: #8e44ad;
+}
+a{
+  color:white !important;
 }

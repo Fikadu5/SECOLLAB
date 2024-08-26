@@ -14,7 +14,7 @@ event.preventDefault();
 }
 else{
 
- window.location.href = "http://127.0.0.1:5000/searchprofile/" + text;
+ window.location.href = "http://127.0.0.1:3000/searchuser/" + text;
 
 }
 
