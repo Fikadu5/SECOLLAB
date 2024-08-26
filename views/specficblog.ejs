@@ -13,7 +13,7 @@
   <link href="/css/bootstrap.min.css" rel="stylesheet">
   <!-- Material Design Bootstrap -->
   <link href="/css/mdb.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/css/sidebar.css">
+  
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <!-- Your custom styles (optional) -->
   <link href="/css/style.min.css" rel="stylesheet">
@@ -103,7 +103,7 @@ color:white;
 
       <!--Section: Post-->
       <section class="mt-6">
- <h1 style="margin-left: 30%;"><%= blog.title %></h1>
+ <h1 style="margin-left: 10%;"><%= blog.title %></h1>
         <!--Grid row-->
         <div class="row">
 
@@ -142,7 +142,7 @@ color:white;
 
                     <span  liked="{{ liked }}" id="numlike" class="like-count"><%= blog.like %></span>
                 </button>
-                  <p class="post-meta">Posted by <%= blog.owner.fname %> <%= blog.owner.lname %> </p>
+                  <a href="/otherprofile/<%= blog.owner._id %>"><p class="post-meta">Posted by <%= blog.owner.fname %> <%= blog.owner.lname %> </p></a>
           <p class="post-meta">On <%= blog.created_at.toDateString() %></p>
 
               </div>

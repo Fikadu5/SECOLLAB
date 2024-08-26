@@ -11,30 +11,35 @@
 <body>
     <%- include("navigationloggedin") %>
     <%- include("sidebar") %>
+    
+
     <% if (messages && messages.success && messages.success.length > 0) { %>
-        <div class="alert alert-success">
-            <%= messages.success %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          <strong>Success!</strong> <%= messages.success %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-    <% } %>
-    
-    <% if (messages && messages.error && messages.error.length > 0) { %>
-        <div class="alert alert-danger">
-            <%= messages.error %>
+      <% } %>
+      
+      <% if (messages && messages.error && messages.error.length > 0) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <strong>Error!</strong> <%= messages.error %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-    <% } %>
-    
-    <% if (messages && messages.length > 0) { %>
-        <div class="alert alert-info">
-            <%= messages %>
+      <% } %>
+      
+      <% if (messages && messages.length > 0) { %>
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+          <strong>Notice:</strong> <%= messages %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-    <% } %>
+      <% } %>
 
     <div class="container">
     
             <div class="project-details">
                 <h2><%= project.title %></h2>
                 <p><%= project.description %></p>
-                <p>Due Date: <%= project.dueDate %></p>
+                <p>Due Date: <%= project.dueDate.toDateString() %></p>
             </div>
             
             <h3 style="margin-left: 45%;">Team</h3>

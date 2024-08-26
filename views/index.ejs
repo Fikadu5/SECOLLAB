@@ -19,25 +19,30 @@
 
 <%- include("navigationloggedin") %>
 
-<%- include("sidebar") %>
+
 
 <% if (messages && messages.success && messages.success.length > 0) { %>
-    <div class="alert alert-success">
-        <%= messages.success %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <strong>Success!</strong> <%= messages.success %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-<% } %>
-
-<% if (messages && messages.error && messages.error.length > 0) { %>
-    <div class="alert alert-danger">
-        <%= messages.error %>
+  <% } %>
+  
+  <% if (messages && messages.error && messages.error.length > 0) { %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <strong>Error!</strong> <%= messages.error %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-<% } %>
-
-<% if (messages && messages.length > 0) { %>
-    <div class="alert alert-info">
-        <%= messages %>
+  <% } %>
+  
+  <% if (messages && messages.length > 0) { %>
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+      <strong>Notice:</strong> <%= messages %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-<% } %>
+  <% } %>
+  
+<%- include("sidebar") %>
     <div class="hero-content">
         <h2 style="margin-left: 0%;;">Welcome to SEcollab</h2>
         <p>A platform for software engineers to collaborate, write blogs, and connect with others.</p>
@@ -124,7 +129,7 @@
                             <div class="user">
                                 <img src="/uploads/<%= users[i].image %>" alt="User Image" class="profile">
                                 <h3><%= users[i].fname %> <%= users[i].lname %></h3>
-                                <p>Bio: <%= users[i].about_me %></p>
+                                <p>Bio: <%= users[i].about_me.substring(0, 30)  %>...</p>
                             </a>
                                 <button user-id=<%= users[i]._id %> class="follow">Follow</button>
                             </div>
@@ -137,7 +142,7 @@
     </div>
   
 <div class="loader-wrapper">
-      <span class="loader"><img class="rotating-image" src="../static/images/473.jpg"></span>
+      <span class="loader"><img class="rotating-image" src="/images/logo.png"></span>
     </div>
 <script>
 document.addEventListener('DOMContentLoaded', function() {

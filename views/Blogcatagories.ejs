@@ -20,22 +20,27 @@
   <%- include("sidebar") %>
   
   <% if (messages && messages.success && messages.success.length > 0) { %>
-    <div class="alert alert-success">
-        <%= messages.success %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <strong>Success!</strong> <%= messages.success %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-<% } %>
+  <% } %>
+  
+  <% if (messages && messages.error && messages.error.length > 0) { %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <strong>Error!</strong> <%= messages.error %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% } %>
+  
+  <% if (messages && messages.length > 0) { %>
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+      <strong>Notice:</strong> <%= messages %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% } %>
 
-<% if (messages && messages.error && messages.error.length > 0) { %>
-    <div class="alert alert-danger">
-        <%= messages.error %>
-    </div>
-<% } %>
-
-<% if (messages && messages.length > 0) { %>
-    <div class="alert alert-info">
-        <%= messages %>
-    </div>
-<% } %>
+  
   <div class="container">
     <h1>Blog Categories</h1>
     <div class="card-container">

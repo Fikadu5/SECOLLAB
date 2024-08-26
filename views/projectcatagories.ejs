@@ -13,24 +13,29 @@
 
   <%- include("sidebar") %>
 
-  
   <% if (messages && messages.success && messages.success.length > 0) { %>
-    <div class="alert alert-success">
-        <%= messages.success %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <strong>Success!</strong> <%= messages.success %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-<% } %>
+  <% } %>
+  
+  <% if (messages && messages.error && messages.error.length > 0) { %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <strong>Error!</strong> <%= messages.error %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% } %>
+  
+  <% if (messages && messages.length > 0) { %>
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+      <strong>Notice:</strong> <%= messages %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% } %>
 
-<% if (messages && messages.error && messages.error.length > 0) { %>
-    <div class="alert alert-danger">
-        <%= messages.error %>
-    </div>
-<% } %>
 
-<% if (messages && messages.length > 0) { %>
-    <div class="alert alert-info">
-        <%= messages %>
-    </div>
-<% } %>
+
   <header>
     <h1>Project Categories</h1>
     <p>Discover our diverse range of projects</p>
@@ -42,7 +47,7 @@
             <div class="card-image" style="background-image: url('https://via.placeholder.com/300x200');"></div>
             <div class="card-content">
                 <h2><%= tags[i].name %></h2>
-		<p>   <%= tags[i].descritpion  %> </p>
+                <p><%= tags[i].description %></p>
                 <a href="/projects/<%= tags[i].name %>">Explore</a>
             </div>
         </article>

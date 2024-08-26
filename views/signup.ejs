@@ -72,22 +72,25 @@
     <%- include("navigationloggedout") %>
 
     <% if (messages && messages.success && messages.success.length > 0) { %>
-        <div class="alert alert-success">
-            <%= messages.success %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          <strong>Success!</strong> <%= messages.success %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-    <% } %>
-
-    <% if (messages && messages.error && messages.error.length > 0) { %>
-        <div class="alert alert-danger">
-            <%= messages.error %>
+      <% } %>
+      
+      <% if (messages && messages.error && messages.error.length > 0) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <strong>Error!</strong> <%= messages.error %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-    <% } %>
-
-    <% if (messages && messages.length > 0) { %>
-        <div class="alert alert-info">
-            <%= messages %>
+      <% } %>
+      
+      <% if (messages && messages.length > 0) { %>
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+          <strong>Notice:</strong> <%= messages %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-    <% } %>
+      <% } %>
 
     <div class="container mt-5">
         <div class="form-container mx-auto" style="max-width: 600px;">
@@ -124,7 +127,7 @@
                     <input type="text" class="form-control" id="github" name="github">
                 </div>
                 <div class="mb-3">
-                    <label for="previous" class="form-label">Previous:</label>
+                    <label for="previous" class="form-label">Previous Experience:</label>
                     <input type="text" class="form-control" id="previous" name="previous" required>
                 </div>
                 <div class="mb-3">
@@ -148,7 +151,7 @@
                     <input type="email" class="form-control" id="email" name="email" required>
                 </div>
                 <div class="mb-3">
-                    <label for="about_me" class="form-label">About Me:</label>
+                    <label for="about_me" class="form-label">Bio:</label>
                     <textarea class="form-control" id="about_me" name="about_me" rows="3" required></textarea>
                 </div>
                 <div class="mb-3">
