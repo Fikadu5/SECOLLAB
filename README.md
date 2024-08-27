@@ -11,3 +11,9 @@ Whether you’re a professional looking to manage complex projects or a blogger 
 
 Explore SECOLLAB and experience the future of collaborative platforms, where innovation and community come together to create extraordinary outcomes.
 
+## Features
+
+- **User Registration and Authentication**: Secure user sign-up and login with Passport.js.
+- **Project Collaboration**: Users can create, view, and collaborate on projects.
+- **Blog Management**: Users can write and share their own blogs and read blogs from other users.
+- **Follow System**: Users can follow other users to see their projects and blogs.
