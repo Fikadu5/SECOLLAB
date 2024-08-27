@@ -17,3 +17,67 @@ Explore SECOLLAB and experience the future of collaborative platforms, where inn
 - **Project Collaboration**: Users can create, view, and collaborate on projects.
 - **Blog Management**: Users can write and share their own blogs and read blogs from other users.
 - **Follow System**: Users can follow other users to see their projects and blogs.
+
+
+
+
+## Technologies Used
+
+- **Backend**: Node.js
+- **Libraries**:
+  - `body-parser`: ^1.20.2
+  - `connect-flash`: ^0.1.1
+  - `dotenv`: ^16.4.5
+  - `ejs`: ^3.1.10
+  - `express`: ^4.19.2
+  - `express-session`: ^1.18.0
+  - `helmet`: ^7.1.0
+  - `memory-cache`: ^0.2.0
+  - `mongoose`: ^8.4.4
+  - `multer`: ^1.4.5-lts.1
+  - `node-fetch`: ^3.3.2
+  - `node-mocks-http`: ^1.15.1
+  - `nodemailer`: ^6.9.14
+  - `passport`: ^0.7.0
+  - `passport-local`: ^1.0.0
+  - `passport-local-mongoose`: ^8.0.0
+  - `path`: ^0.12.7
+  - `sinon`: ^18.0.0
+  - `validator`: ^13.12.0
+  - `xss`: ^1.0.15
+## Installation
+
+1. **Clone the Repository:**
+   ```bash
+   git clone https://github.com/your-username/secollab.git
+Navigate to the Project Directory:
+
+```
+
+cd secollab
+```
+
+
+2.**Install Dependencies**:
+
+```
+
+ npm install
+ ```
+Create a .env File:
+
+3.**Copy the example environment file and update it with your settings.**
+
+
+ ```
+cp .env.example .env
+ ```
+Update the .env File:
+
+4.**Add your environment variables in the .env file (e.g., database connection strings, secret keys).**
+Run the Application:
+
+
+
+
+
