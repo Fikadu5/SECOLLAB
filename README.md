@@ -26,7 +26,9 @@ Explore SECOLLAB and experience the future of collaborative platforms, where inn
 - **Backend**: Node.js
 - **Libraries**:
   - `body-parser`: ^1.20.2
+  - "bcrypt": "^5.1.1"
   - `connect-flash`: ^0.1.1
+  - "cors": "^2.8.5"
   - `dotenv`: ^16.4.5
   - `ejs`: ^3.1.10
   - `express`: ^4.19.2
