@@ -157,9 +157,10 @@ exports.getmycollabration = async(req,res) => {
   const id = req.user._id;
   const projects = await projectservice.getcollabration(id)
   const currentuser = await  userService.getUserById(req.user._id);
-
+  const request = await projectservice.getrequests(req.user._id)
   res.render("mycollabration",{
       projects,
+      request,
      messages: {
       success: req.flash('success'),
       error: req.flash('error')
@@ -390,3 +391,17 @@ exports.getUserProjects = async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 };
+
+
+
+exports.removeinterest = async(req,res) =>
+{
+  const projectid = req.params.id;
+  const remove = projectservice.removeInterest(projectid,req.user._id)
+  if(remove)
+  {
+    console.log("successfully removed interest")
+  }
+  res.redirect('/')
+
+}

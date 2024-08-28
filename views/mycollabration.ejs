@@ -9,6 +9,7 @@
    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="/css/collabration.css">
+    
     <style>
 
 
@@ -58,9 +59,35 @@
                 <% } %>
             <% } %>
         </div>
+        <h3>Your project Requests</h3>
+        <div class="parent">
+          <% if(projects.length === 0) { %>
+              <h3>There are no projects available</h3>
+          <% } else { %>
+              <% for(let i=0;i< request.length;i++) { %>
+                  <div class="child">
+                      <p><%= request[i].title %></p>
+                      <p><%= request[i].description %></p>
+                      <p>Due Date: <%= request[i].dueDate %></p>
+                      <a href="/projects/projects/<%= request[i]._id %>" type="button">
+                          <button class="details-button">View Details</button>
+                      </a>
+                      <a href="/projects/removeinterest/<%= request[i]._id %>" type="button" onclick="return confirmRemoval();">
+                        <button class="details-button">Remove Interest</button>
+                    </a>
+
+                  </div>
+              <% } %>
+          <% } %>
+      </div>
+
 
     
-
+      <script>
+        function confirmRemoval() {
+            return confirm("Are you sure you want to remove your interest in this project?");
+        }
+        </script>
         
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>

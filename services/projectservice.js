@@ -271,3 +271,32 @@ exports.getUserProjects = async (id, page = 1, limit = 10) => {
     limit: parseInt(limit)
   };
 };
+
+exports.removeInterest = async (projectId, userId) => {
+  try {
+    const project = await Project.findById(projectId);
+    if (project) {
+      // Check if userId is in the requests array
+      if (project.requests.includes(userId)) {
+        // Remove userId from the requests array
+        project.requests.pull(userId);
+        await project.save(); // Make sure to await the save operation
+        return true; // Return true to indicate success
+      } else {
+        console.log("Request not found");
+        return false; // Return false if userId was not found
+      }
+    } else {
+      console.log("Project not found");
+      return false; // Return false if project is not found
+    }
+  } catch (err) {
+    console.log(err);
+    return false; // Return false in case of an error
+  }
+};
+exports.getrequests = async(id) =>
+{
+  const requests = await Project.find({ requests: { $in: id } });
+ return requests
+}

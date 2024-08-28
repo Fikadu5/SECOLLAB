@@ -1,10 +1,13 @@
 const express = require('express');
 const { getProjects, createProject, getProjectById, searchProjects, getmyprojectwithid, getUserProjects,
     getsearchresult, searchResults, getFollowingProjects, getMyProjects, getmycollabration, deleteproject, newproject,
-    getcatagories, registerInterestwithid, acceptinterest, getcatprojects
+    getcatagories, registerInterestwithid, acceptinterest, getcatprojects,removeinterest
 } = require('../controllers/projectcontrollers');
 const router = express.Router();
 const { ensureAuthenticated } = require('../middleware/authMiddleware');
+
+
+router.get("/removeinterest/:id", ensureAuthenticated, removeinterest);
 
 // Get all projects for the current user
 router.get("/userproject/:id", ensureAuthenticated, getUserProjects);
@@ -62,5 +65,8 @@ router.get('/searchproject', ensureAuthenticated, searchProjects);
 
 // Get projects by category
 router.get("/:name", ensureAuthenticated, getcatprojects);
+
+
+
 
 module.exports = router;
