@@ -41,7 +41,7 @@
         <% following.results.forEach(f => { %>
           <div class="follower">
             <div class="profile-image-container">
-              <img src="/uploads/<%= f.follower.image %>" alt="User Profile" class="profile-image">
+              <img src="/uploads/<%= f.following.image %>" alt="User Profile" class="profile-image">
             </div>
             <div class="follower-info">
               <a href="/otherprofile/<%= f.following._id %>" class="follower-name">
